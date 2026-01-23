@@ -58,6 +58,66 @@ class LRGenerator(nn.Module):
         pe = get_2d_positional_encoding(N, N, nchann)      # (N, N, C)
         pe = pe.permute(2, 0, 1).unsqueeze(0)              # (1, C, N, N)
         self.register_buffer("pos_enc", pe)
+    
+class LRGenerator(nn.Module):
+    def __init__(self, PatchSize, Headhdim,N,nchann):
+        super().__init__()
+        self.rank = 3
+        self.npatch = N//PatchSize
+        self.psize = PatchSize
+        self.vtokenproj = nn.Linear(PatchSize**2,Headhdim)
+        self.htokenproj = nn.Linear(PatchSize**2,Headhdim)
+        self.Vproj = nn.Linear(Headhdim * self.npatch, self.rank * N)
+        self.Hproj = nn.Linear(Headhdim * self.npatch, self.rank * N)
+        #self.Vprojs = nn.ModuleList([nn.Linear(Headhdim*self.npatch,N*self.rank) for i in range(self.rank)])
+        #self.Hprojs = nn.ModuleList([nn.Linear(Headhdim*self.npatch,N*self.rank) for i in range(self.rank)])
+        pe = get_2d_positional_encoding(N,N,nchann)
+        pe = get_2d_positional_encoding(N, N, nchann)      # (N, N, C)
+        pe = pe.permute(2, 0, 1).unsqueeze(0)              # (1, C, N, N)
+        self.register_buffer("pos_enc", pe)
+        self.vcln = nn.LayerNorm(Headhdim*self.npatch)
+        self.hcln = nn.LayerNorm(Headhdim*self.npatch)
+    def forward(self, x):
+        ## Patching and tokenization
+        b,c,h,w = x.shape
+        #print(x.shape)
+        #print(self.pos_enc.shape)
+        y = x + self.pos_enc # B x C x N x N
+        p = self.psize
+        np = self.npatch
+        patches = y.unfold(2, p, p).unfold(3, p, p) ## B x Np x Np x Ps x Ps
+        #patches = patches.contiguous().view(3, -1, p, p)
+        patches = patches.contiguous().view(b,c,np,np,p*p) ## flattened patches
+        vtok = self.vtokenproj(patches)
+        htok = self.htokenproj(patches)
+
+        # vertical component: for each column i, sum over rows j
+        # vcol: (B,C,np,Headhdim)
+        vcol = vtok.sum(dim=2)
+
+        # horizontal component: for each row j, sum over cols i
+        # hrow: (B,C,np,Headhdim)
+        hrow = htok.sum(dim=3)
+
+        # flatten np tokens into one vector per channel
+        # vcomp/hcomp: (B,C,Headhdim*np)
+        vcomp = vcol.reshape(b, c, -1)
+        hcomp = hrow.reshape(b, c, -1)
+        
+        vcomp = self.vcln(vcomp)
+        hcomp = self.hcln(hcomp)
+
+        # project to rank*N then reshape
+        # V,H: (B,C,rank,N)
+        V = self.Vproj(vcomp).view(b, c, self.rank, h)
+        Hm = self.Hproj(hcomp).view(b, c, self.rank, w)
+
+        # feat: sum_r V_r[:, :, :, i] * H_r[:, :, :, j]
+        # -> (B,C,H,W)
+        lrfeats = torch.einsum("bcrh,bcrw->bchw", V, Hm)
+
+        return lrfeats
+    """
     def forward(self, x):
         ## Patching and tokenization
         b,c,h,w = x.shape
@@ -95,7 +155,6 @@ class LRGenerator(nn.Module):
         lrfeats = torch.einsum("bcrh,bcrw->bchw", V, Hm)
 
         return lrfeats
-        """
         lrfeats = torch.zeros_like(x)
         for _c in range(c):
             VCat = []
