@@ -52,8 +52,8 @@ class LRGenerator(nn.Module):
         self.psize = PatchSize
         self.vtokenproj = nn.Linear(PatchSize**2,Headhdim)
         self.htokenproj = nn.Linear(PatchSize**2,Headhdim)
-        self.Vprojs = nn.ModuleList([nn.Linear(Headhdim*self.npatch,N) for i in range(self.rank)])
-        self.Hprojs = nn.ModuleList([nn.Linear(Headhdim*self.npatch,N) for i in range(self.rank)])
+        self.Vprojs = nn.ModuleList([nn.Linear(Headhdim*self.npatch,N*rank) for i in range(self.rank)])
+        self.Hprojs = nn.ModuleList([nn.Linear(Headhdim*self.npatch,N*rank) for i in range(self.rank)])
         pe = get_2d_positional_encoding(N,N,nchann)
         pe = get_2d_positional_encoding(N, N, nchann)      # (N, N, C)
         pe = pe.permute(2, 0, 1).unsqueeze(0)              # (1, C, N, N)
@@ -69,6 +69,33 @@ class LRGenerator(nn.Module):
         patches = y.unfold(2, p, p).unfold(3, p, p) ## B x Np x Np x Ps x Ps
         #patches = patches.contiguous().view(3, -1, p, p)
         patches = patches.contiguous().view(b,c,np,np,p*p) ## flattened patches
+        vtok = self.vtokenproj(patches)
+        htok = self.htokenproj(patches)
+
+        # vertical component: for each column i, sum over rows j
+        # vcol: (B,C,np,Headhdim)
+        vcol = vtok.sum(dim=2)
+
+        # horizontal component: for each row j, sum over cols i
+        # hrow: (B,C,np,Headhdim)
+        hrow = htok.sum(dim=3)
+
+        # flatten np tokens into one vector per channel
+        # vcomp/hcomp: (B,C,Headhdim*np)
+        vcomp = vcol.reshape(B, C, -1)
+        hcomp = hrow.reshape(B, C, -1)
+
+        # project to rank*N then reshape
+        # V,H: (B,C,rank,N)
+        V = self.Vproj(vcomp).view(B, C, self.rank, H)
+        Hm = self.Hproj(hcomp).view(B, C, self.rank, W)
+
+        # feat: sum_r V_r[:, :, :, i] * H_r[:, :, :, j]
+        # -> (B,C,H,W)
+        lrfeats = torch.einsum("bcrh,bcrw->bchw", V, Hm)
+
+        return lrfeats
+        """
         lrfeats = torch.zeros_like(x)
         for _c in range(c):
             VCat = []
@@ -100,7 +127,9 @@ class LRGenerator(nn.Module):
             #feat = torch.matmul(V,H)
             feat = V@H.transpose(-1,-2)
             lrfeats[:,_c,:,:] = feat
+        
         return lrfeats
+        """
         
 
 class PreActBottleneck(nn.Module):
