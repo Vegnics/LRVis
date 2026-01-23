@@ -61,6 +61,8 @@ class LRGenerator(nn.Module):
     def forward(self, x):
         ## Patching and tokenization
         b,c,h,w = x.shape
+        print(x.shape)
+        print(self.pos_enc.shape)
         y = x + self.pos_enc # B x C x N x N
         p = self.psize
         np = self.npatch
