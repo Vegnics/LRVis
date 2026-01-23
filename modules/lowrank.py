@@ -190,9 +190,9 @@ class PreActResNet(nn.Module):
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
         self.layer1 = self._make_layer(block, 64,128,  num_blocks[0], stride=1,N=128) #512
-        self.layer2 = self._make_layer(block, 128,256, num_blocks[1], stride=2,N=64) #128
-        self.layer3 = self._make_layer(block, 256,512, num_blocks[2], stride=2,N=32) # 64
-        self.layer4 = self._make_layer(block, 512,512*4, num_blocks[3], stride=2,N=16) #32
+        self.layer2 = self._make_layer(block, 128,256, num_blocks[1], stride=2,N=128) #128
+        self.layer3 = self._make_layer(block, 256,512, num_blocks[2], stride=2,N=64) # 64
+        self.layer4 = self._make_layer(block, 512,512*4, num_blocks[3], stride=2,N=32) #32
 
         self.bn_final = nn.BatchNorm2d(512 * 4)
         self.fc = nn.Linear(512 * 4, num_classes)
