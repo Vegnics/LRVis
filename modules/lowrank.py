@@ -77,6 +77,10 @@ class LRGenerator(nn.Module):
         self.register_buffer("pos_enc", pe)
         self.vcln = nn.LayerNorm(Headhdim*self.npatch)
         self.hcln = nn.LayerNorm(Headhdim*self.npatch)
+        self.vcompln = nn.LayerNorm(nchann//2)
+        self.hcompln = nn.LayerNorm(nchann//2)
+        self.vchannlin = nn.Linear(nchann,nchann//2)
+        self.hchannlin = nn.Linear(nchann,nchann//2)
         self.fbn = nn.BatchNorm2d(nchann)
     def forward(self, x):
         ## Patching and tokenization
@@ -90,8 +94,8 @@ class LRGenerator(nn.Module):
         patches = y.unfold(2, p, p).unfold(3, p, p) ## B x Np x Np x Ps x Ps
         #patches = patches.contiguous().view(3, -1, p, p)
         patches = patches.contiguous().view(b,c,np,np,p*p) ## flattened patches
-        vtok = self.vtokenproj(patches)
-        htok = self.htokenproj(patches)
+        vtok = F.gelu(self.vtokenproj(patches))
+        htok = F.gelu(self.htokenproj(patches))
 
         # vertical component: for each column i, sum over rows j
         # vcol: (B,C,np,Headhdim)
@@ -106,8 +110,15 @@ class LRGenerator(nn.Module):
         vcomp = vcol.reshape(b, c, -1)
         hcomp = hrow.reshape(b, c, -1)
         
-        vcomp = self.vcln(vcomp)
-        hcomp = self.hcln(hcomp)
+        # vcomp : B x C x hdim*np
+        vcomp = self.vcln(vcomp).transpose(1,2)
+        hcomp = self.hcln(hcomp).transpose(1,2)
+        
+        #vcomp/hcomp : B x hdim*np x C
+        vcomp = F.gelu(self.vchannlin(vcomp).transpose(2,1))
+        hcomp = F.gelu(self.hchannlin(hcomp).transpose(2,1))
+        vcomp = self.vcompln(vcomp)
+        hcomp = self.hcompln(hcomp)
 
         # project to rank*N then reshape
         # V,H: (B,C,rank,N)
