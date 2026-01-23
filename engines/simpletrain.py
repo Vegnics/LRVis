@@ -18,6 +18,7 @@ from torchvision import datasets, transforms
 
 # Example: assume preact_resnet18_bottleneck is already defined in this file.
 
+from modules.lowrank import preact_resnet18_bottleneck
 
 def accuracy_topk(logits, targets, topk=(1, 5)):
     with torch.no_grad():
