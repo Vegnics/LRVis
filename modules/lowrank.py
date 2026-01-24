@@ -117,13 +117,13 @@ class LRGenerator(nn.Module):
         #vcomp/hcomp : B x hdim*np x C
         vcomp = F.gelu(self.vchannlin(vcomp).transpose(2,1))
         hcomp = F.gelu(self.hchannlin(hcomp).transpose(2,1))
-        vcomp = self.vcompln(vcomp)
-        hcomp = self.hcompln(hcomp)
+        #vcomp = self.vcompln(vcomp)
+        #hcomp = self.hcompln(hcomp)
 
         # project to rank*N then reshape
         # V,H: (B,C,rank,N)
-        V = self.Vproj(vcomp).view(b, c, self.rank, h)
-        Hm = self.Hproj(hcomp).view(b, c, self.rank, w)
+        V = self.Vproj(vcomp).view(b, c//2, self.rank, h)
+        Hm = self.Hproj(hcomp).view(b, c//2, self.rank, w)
 
         # feat: sum_r V_r[:, :, :, i] * H_r[:, :, :, j]
         # -> (B,C,H,W)
@@ -270,7 +270,7 @@ class PreActBottleneckLR(nn.Module):
         out = self.conv3(F.relu(self.bn3(out)))
         if self.lrgen is not None:
             lrfeats = self.lrgen(x)
-            lrfeats = self.convlr(lrfeats)
+            #lrfeats = self.convlr(lrfeats)
             if self.stride == 2:
                 lrfeats = F.avg_pool2d(lrfeats, kernel_size=2, stride=2)
         else:
