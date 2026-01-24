@@ -117,6 +117,7 @@ class LRGenerator(nn.Module):
         #vcomp/hcomp : B x hdim*np x C
         vcomp = F.gelu(self.vchannlin(vcomp).transpose(2,1))
         hcomp = F.gelu(self.hchannlin(hcomp).transpose(2,1))
+        print(vcomp.shape)
         #vcomp = self.vcompln(vcomp)
         #hcomp = self.hcompln(hcomp)
 
