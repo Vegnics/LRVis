@@ -175,7 +175,9 @@ def main():
 
     # --------- Loss / Optim / Scheduler ---------
     criterion = nn.CrossEntropyLoss(label_smoothing=args.label_smoothing).to(device)
-    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.wd)
+    #optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.wd)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=[0.9,0.99], weight_decay=args.wd)
+
 
     # Classic ImageNet schedule: step LR at 30/60/80
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30, 60, 80], gamma=0.1)
