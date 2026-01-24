@@ -288,7 +288,7 @@ class PreActBottleneckLR(nn.Module):
         self.conv2 = nn.Conv2d(in_planes//2, in_planes//2, kernel_size=3, stride=stride, padding=1, bias=False)
 
         self.bn3 = nn.BatchNorm2d(in_planes//2)
-        self.conv3 = nn.Conv2d(in_planes//2, out_planes//2, kernel_size=1, bias=True)
+        self.conv3 = nn.Conv2d(in_planes//2, in_planes//2, kernel_size=1, bias=True)
         self.stride = stride
         self.shortcut = None
         if stride != 1 or in_planes != out_planes:
