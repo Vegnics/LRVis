@@ -271,7 +271,7 @@ class PreActBottleneckLR(nn.Module):
         out = self.conv3(F.relu(self.bn3(out)))
         if self.lrgen is not None:
             lrfeats = self.lrgen(x)
-            #lrfeats = self.convlr(lrfeats)
+            lrfeats = self.convlr(lrfeats)
             if self.stride == 2:
                 lrfeats = F.avg_pool2d(lrfeats, kernel_size=2, stride=2)
         else:
