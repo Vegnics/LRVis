@@ -65,10 +65,30 @@ class LRGenerator(nn.Module):
         self.rank = 3
         self.npatch = N//PatchSize
         self.psize = PatchSize
-        self.vtokenproj = nn.Linear(PatchSize**2,Headhdim)
-        self.htokenproj = nn.Linear(PatchSize**2,Headhdim)
-        self.Vproj = nn.Linear(Headhdim * self.npatch, self.rank * N)
-        self.Hproj = nn.Linear(Headhdim * self.npatch, self.rank * N)
+        self.vtokenproj = nn.Sequential(
+            nn.Linear(PatchSize**2,2*PatchSize**2),
+            nn.GELU(),
+            nn.Linear(2*PatchSize**2,2*PatchSize**2),
+            nn.GELU(),
+            nn.Linear(2*PatchSize**2,Headhdim)
+        )
+        self.htokenproj = nn.Sequential(
+            nn.Linear(PatchSize**2,2*PatchSize**2),
+            nn.GELU(),
+            nn.Linear(2*PatchSize**2,2*PatchSize**2),
+            nn.GELU(),
+            nn.Linear(2*PatchSize**2,Headhdim)
+        )#nn.Linear(PatchSize**2,Headhdim)
+        self.Vproj = nn.Sequential(
+            nn.Linear(Headhdim * self.npatch,Headhdim * self.npatch),
+            nn.GELU(),
+            nn.Linear(Headhdim * self.npatch,self.rank * N)
+            ) #nn.Linear(Headhdim * self.npatch, self.rank * N)
+        self.Hproj = nn.Sequential(
+            nn.Linear(Headhdim * self.npatch,Headhdim * self.npatch),
+            nn.GELU(),
+            nn.Linear(Headhdim * self.npatch,self.rank * N)
+            )#nn.Linear(Headhdim * self.npatch, self.rank * N)
         #self.Vprojs = nn.ModuleList([nn.Linear(Headhdim*self.npatch,N*self.rank) for i in range(self.rank)])
         #self.Hprojs = nn.ModuleList([nn.Linear(Headhdim*self.npatch,N*self.rank) for i in range(self.rank)])
         pe = get_2d_positional_encoding(N,N,nchann)
@@ -79,8 +99,20 @@ class LRGenerator(nn.Module):
         self.hcln = nn.LayerNorm(Headhdim*self.npatch)
         self.vcompln = nn.LayerNorm(nchann//2)
         self.hcompln = nn.LayerNorm(nchann//2)
-        self.vchannlin = nn.Linear(nchann,nchann//2)
-        self.hchannlin = nn.Linear(nchann,nchann//2)
+        self.vchannlin = nn.Sequential(
+            nn.Linear(nchann,nchann//2),
+            nn.GELU(),
+            nn.Linear(nchann//2,nchann//2),
+            nn.GELU(),
+            nn.Linear(nchann//2,nchann//2)
+            )##nn.Linear(nchann,nchann//2)
+        self.hchannlin = nn.Sequential(
+            nn.Linear(nchann,nchann//2),
+            nn.GELU(),
+            nn.Linear(nchann//2,nchann//2),
+            nn.GELU(),
+            nn.Linear(nchann//2,nchann//2)
+            ) #nn.Linear(nchann,nchann//2)
         self.fbn = nn.BatchNorm2d(nchann)
     def forward(self, x):
         ## Patching and tokenization
@@ -117,7 +149,7 @@ class LRGenerator(nn.Module):
         #vcomp/hcomp : B x hdim*np x C
         vcomp = F.gelu(self.vchannlin(vcomp).transpose(2,1))
         hcomp = F.gelu(self.hchannlin(hcomp).transpose(2,1))
-        print(vcomp.shape,x.shape)
+        #print(vcomp.shape,x.shape)
         #vcomp = self.vcompln(vcomp)
         #hcomp = self.hcompln(hcomp)
 
@@ -245,7 +277,7 @@ class PreActBottleneckLR(nn.Module):
         super().__init__()
         
         self.lrgen = LRGenerator(4,4,N,in_planes) if use_lr else None
-        self.convlr = nn.Conv2d(in_planes//2, out_planes//2, kernel_size=1, bias=True)
+        self.convlr = nn.Conv2d(in_planes, out_planes, kernel_size=1, bias=True)
 
         self.convlrmatch = nn.Conv2d(out_planes//2, out_planes//2, kernel_size=1, bias=True)
         
@@ -271,13 +303,14 @@ class PreActBottleneckLR(nn.Module):
         out = self.conv3(F.relu(self.bn3(out)))
         if self.lrgen is not None:
             lrfeats = self.lrgen(x)
-            lrfeats = self.convlr(lrfeats)
+            #lrfeats = self.convlr(lrfeats)
             if self.stride == 2:
                 lrfeats = F.avg_pool2d(lrfeats, kernel_size=2, stride=2)
         else:
             lrfeats = self.convlrmatch(out) # self.convlr(out)
 
         out = torch.concat([out,lrfeats],dim=1)
+        out = self.convlr(out)
 
         out = out + shortcut
         return out
