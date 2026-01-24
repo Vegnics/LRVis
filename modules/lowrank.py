@@ -245,7 +245,7 @@ class PreActBottleneckLR(nn.Module):
         super().__init__()
         
         self.lrgen = LRGenerator(4,4,N,in_planes) if use_lr else None
-        self.convlr = nn.Conv2d(in_planes, out_planes//2, kernel_size=1, bias=True)
+        self.convlr = nn.Conv2d(in_planes//2, out_planes//2, kernel_size=1, bias=True)
 
         self.convlrmatch = nn.Conv2d(out_planes//2, out_planes//2, kernel_size=1, bias=True)
         
