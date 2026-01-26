@@ -126,8 +126,8 @@ class LRGenerator(nn.Module):
         b,c,h,w = x.shape
         #print(x.shape)
         #print(self.pos_enc.shape)
-        x = self.fbn(x)
-        y = x + 0.4*self.pos_enc # B x C x N x N
+        #x = self.fbn(x)
+        y = x + self.pos_enc # B x C x N x N
         p = self.psize
         np = self.npatch
         patches = y.unfold(2, p, p).unfold(3, p, p) ## B x Np x Np x Ps x Ps
