@@ -240,7 +240,7 @@ class LRGenerator(nn.Module):
 class PreActBottleneck(nn.Module):
     expansion = 4
 
-    def __init__(self, in_planes, out_planes, stride=1):
+    def __init__(self, in_planes, out_planes, stride=1,**kwargs):
         super().__init__()
 
         self.bn1 = nn.BatchNorm2d(in_planes)
@@ -321,7 +321,7 @@ class PreActResNet(nn.Module):
         super().__init__()
         self.in_planes = 64
 
-        self.conv1 = nn.Conv2d(in_ch, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        self.conv1 = nn.Conv2d(in_ch, 64, kernel_size=7, stride=2, padding=3, bias=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
         self.layer1 = self._make_layer(block, 64,128,  num_blocks[0], stride=1,N=128) #512
@@ -331,6 +331,7 @@ class PreActResNet(nn.Module):
 
         self.bn_final = nn.BatchNorm2d(512 * 4)
         self.fc = nn.Linear(512 * 4, num_classes)
+
 
     """def _make_layer(self, block, iplanes, oplanes, nblocks, stride,N):
         strides = [stride] + [1] * (nblocks - 1)
@@ -375,6 +376,10 @@ class PreActResNet(nn.Module):
         return out
 
 
-def preact_resnet18_bottleneck(num_classes=1000, in_ch=3):
+def preact_resnet18_bottleneck(num_classes=1000, in_ch=3,useLR=True):
     # "ResNet-18 depth schedule" but bottleneck blocks
-    return PreActResNet(PreActBottleneckLR, [2, 2, 2, 2], num_classes=num_classes, in_ch=in_ch)
+    block_type = PreActBottleneckLR if useLR else PreActBottleneck
+    return PreActResNet(block_type,
+                        [2, 2, 2, 2],
+                        num_classes=num_classes,
+                        in_ch=in_ch) if useLR else Pr
