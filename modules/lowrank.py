@@ -60,11 +60,15 @@ class LRGenerator(nn.Module):
         self.register_buffer("pos_enc", pe)
     
 class LRGenerator(nn.Module):
-    def __init__(self, PatchSize, Headhdim,N,nchann):
+    def __init__(self, PatchSize, Headhdim,N,nchann,nchannout):
         super().__init__()
         self.rank = 3
         self.npatch = N//PatchSize
         self.psize = PatchSize
+        self.nchout = nchannout
+        self.lrfeatbias = nn.Parameter(torch.zeros(1,nchannout//2,1,1))
+        
+        ## Layers
         self.vtokenproj = nn.Sequential(
             nn.Linear(PatchSize**2,2*PatchSize**2),
             nn.GELU(),
@@ -97,21 +101,24 @@ class LRGenerator(nn.Module):
         self.register_buffer("pos_enc", pe)
         self.vcln = nn.LayerNorm(Headhdim*self.npatch)
         self.hcln = nn.LayerNorm(Headhdim*self.npatch)
+        
         self.vcompln = nn.LayerNorm(nchann//2)
         self.hcompln = nn.LayerNorm(nchann//2)
+        
+        nchout = self.nchout # nchann
         self.vchannlin = nn.Sequential(
-            nn.Linear(nchann,nchann//2),
+            nn.Linear(nchann,nchout//2),
             nn.GELU(),
-            nn.Linear(nchann//2,nchann//2),
-            nn.GELU(),
-            nn.Linear(nchann//2,nchann//2)
+            nn.Linear(nchout//2,nchout//2),
+            #nn.GELU(),
+            #nn.Linear(nchout//2,nchout//2)
             )##nn.Linear(nchann,nchann//2)
         self.hchannlin = nn.Sequential(
-            nn.Linear(nchann,nchann//2),
+            nn.Linear(nchann,nchout//2),
             nn.GELU(),
-            nn.Linear(nchann//2,nchann//2),
-            nn.GELU(),
-            nn.Linear(nchann//2,nchann//2)
+            nn.Linear(nchout//2,nchout//2),
+            #nn.GELU(),
+            #nn.Linear(nchout//2,nchout//2)
             ) #nn.Linear(nchann,nchann//2)
         self.fbn = nn.BatchNorm2d(nchann)
     def forward(self, x):
@@ -126,13 +133,15 @@ class LRGenerator(nn.Module):
         patches = y.unfold(2, p, p).unfold(3, p, p) ## B x Np x Np x Ps x Ps
         #patches = patches.contiguous().view(3, -1, p, p)
         patches = patches.contiguous().view(b,c,np,np,p*p) ## flattened patches
+        
+        ## Vertical / Horizontal tokens
         vtok = F.gelu(self.vtokenproj(patches))
         htok = F.gelu(self.htokenproj(patches))
 
+        ### AGGREGATION
         # vertical component: for each column i, sum over rows j
         # vcol: (B,C,np,Headhdim)
         vcol = vtok.sum(dim=2)
-
         # horizontal component: for each row j, sum over cols i
         # hrow: (B,C,np,Headhdim)
         hrow = htok.sum(dim=3)
@@ -149,18 +158,15 @@ class LRGenerator(nn.Module):
         #vcomp/hcomp : B x hdim*np x C
         vcomp = F.gelu(self.vchannlin(vcomp).transpose(2,1))
         hcomp = F.gelu(self.hchannlin(hcomp).transpose(2,1))
-        #print(vcomp.shape,x.shape)
-        #vcomp = self.vcompln(vcomp)
-        #hcomp = self.hcompln(hcomp)
-
+        
         # project to rank*N then reshape
         # V,H: (B,C,rank,N)
-        V = self.Vproj(vcomp).view(b, c//2, self.rank, h)
-        Hm = self.Hproj(hcomp).view(b, c//2, self.rank, w)
+        V = self.Vproj(vcomp).view(b, self.nchout//2, self.rank, h)
+        Hm = self.Hproj(hcomp).view(b, self.nchout//2, self.rank, w)
 
         # feat: sum_r V_r[:, :, :, i] * H_r[:, :, :, j]
         # -> (B,C,H,W)
-        lrfeats = torch.einsum("bcrh,bcrw->bchw", V, Hm)
+        lrfeats = torch.einsum("bcrh,bcrw->bchw", V, Hm) + self.lrfeatbias 
 
         return lrfeats
     """
@@ -276,7 +282,7 @@ class PreActBottleneckLR(nn.Module):
     def __init__(self, in_planes, out_planes, stride=1,use_lr=False,N=32):
         super().__init__()
         
-        self.lrgen = LRGenerator(4,4,N,in_planes) if use_lr else None
+        self.lrgen = LRGenerator(4,4,N,in_planes,out_planes) if use_lr else None
         self.convlr = nn.Conv2d(in_planes, out_planes, kernel_size=1, bias=True)
 
         self.convlrmatch = nn.Conv2d(out_planes//2, out_planes//2, kernel_size=1, bias=True)
