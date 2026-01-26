@@ -382,4 +382,4 @@ def preact_resnet18_bottleneck(num_classes=1000, in_ch=3,useLR=True):
     return PreActResNet(block_type,
                         [2, 2, 2, 2],
                         num_classes=num_classes,
-                        in_ch=in_ch) if useLR else Pr
+                        in_ch=in_ch) 
