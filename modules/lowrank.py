@@ -72,7 +72,7 @@ class LRGenerator(nn.Module):
         self.vtokenproj = nn.Sequential(
             nn.Linear(PatchSize**2,2*PatchSize**2),
             nn.GELU(),
-            nn.Dropout1d(0.1),
+            nn.Dropout3d(0.1),
             #nn.Linear(2*PatchSize**2,2*PatchSize**2),
             #nn.GELU(),
             nn.Linear(2*PatchSize**2,Headhdim)
@@ -80,7 +80,7 @@ class LRGenerator(nn.Module):
         self.htokenproj = nn.Sequential(
             nn.Linear(PatchSize**2,2*PatchSize**2),
             nn.GELU(),
-            nn.Dropout1d(0.1),
+            nn.Dropout3d(0.1),
             #nn.Linear(2*PatchSize**2,2*PatchSize**2),
             #nn.GELU(),
             nn.Linear(2*PatchSize**2,Headhdim)
@@ -127,6 +127,7 @@ class LRGenerator(nn.Module):
             #nn.Linear(nchout//2,nchout//2)
             ) #nn.Linear(nchann,nchann//2)
         self.fbn = nn.BatchNorm2d(nchann)
+        self.dp10 = nn.Dropout2d
     def forward(self, x):
         ## Patching and tokenization
         b,c,h,w = x.shape
