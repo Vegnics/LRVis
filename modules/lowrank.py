@@ -324,10 +324,10 @@ class PreActBottleneckLR(nn.Module):
             lrfeats = self.convlrmatch(out) # self.convlr(out)
 
         out = torch.concat([out,lrfeats],dim=1)
-        out = out.permute(0,2,3,1)
+        #out = out.permute(0,2,3,1)
         out = self.convln(out)
         out = self.convlr(out)
-        out = out.permute(0,3,1,2)
+        #out = out.permute(0,3,1,2)
         out = out + shortcut
         return out
 
