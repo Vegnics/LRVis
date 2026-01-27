@@ -72,24 +72,28 @@ class LRGenerator(nn.Module):
         self.vtokenproj = nn.Sequential(
             nn.Linear(PatchSize**2,2*PatchSize**2),
             nn.GELU(),
-            nn.Linear(2*PatchSize**2,2*PatchSize**2),
-            nn.GELU(),
+            nn.Dropout1d(0.1),
+            #nn.Linear(2*PatchSize**2,2*PatchSize**2),
+            #nn.GELU(),
             nn.Linear(2*PatchSize**2,Headhdim)
         )
         self.htokenproj = nn.Sequential(
             nn.Linear(PatchSize**2,2*PatchSize**2),
             nn.GELU(),
-            nn.Linear(2*PatchSize**2,2*PatchSize**2),
-            nn.GELU(),
+            nn.Dropout1d(0.1),
+            #nn.Linear(2*PatchSize**2,2*PatchSize**2),
+            #nn.GELU(),
             nn.Linear(2*PatchSize**2,Headhdim)
         )#nn.Linear(PatchSize**2,Headhdim)
         self.Vproj = nn.Sequential(
             nn.Linear(Headhdim * self.npatch,Headhdim * self.npatch),
+            nn.Dropout1d(0.1),
             nn.GELU(),
             nn.Linear(Headhdim * self.npatch,self.rank * N)
             ) #nn.Linear(Headhdim * self.npatch, self.rank * N)
         self.Hproj = nn.Sequential(
             nn.Linear(Headhdim * self.npatch,Headhdim * self.npatch),
+            nn.Dropout1d(0.1),
             nn.GELU(),
             nn.Linear(Headhdim * self.npatch,self.rank * N)
             )#nn.Linear(Headhdim * self.npatch, self.rank * N)
@@ -109,6 +113,7 @@ class LRGenerator(nn.Module):
         self.vchannlin = nn.Sequential(
             nn.Linear(nchann,nchout//2),
             nn.GELU(),
+            nn.Dropout1d(0.15),
             nn.Linear(nchout//2,nchout//2),
             #nn.GELU(),
             #nn.Linear(nchout//2,nchout//2)
@@ -116,6 +121,7 @@ class LRGenerator(nn.Module):
         self.hchannlin = nn.Sequential(
             nn.Linear(nchann,nchout//2),
             nn.GELU(),
+            nn.Dropout1d(0.15),
             nn.Linear(nchout//2,nchout//2),
             #nn.GELU(),
             #nn.Linear(nchout//2,nchout//2)
@@ -127,7 +133,7 @@ class LRGenerator(nn.Module):
         #print(x.shape)
         #print(self.pos_enc.shape)
         #x = self.fbn(x)
-        y = x + self.pos_enc # B x C x N x N
+        y = x + 0.01*self.pos_enc # B x C x N x N
         p = self.psize
         np = self.npatch
         patches = y.unfold(2, p, p).unfold(3, p, p) ## B x Np x Np x Ps x Ps
@@ -283,6 +289,7 @@ class PreActBottleneckLR(nn.Module):
         super().__init__()
         
         self.lrgen = LRGenerator(4,4,N,in_planes,out_planes) if use_lr else None
+        self.convln = nn.LayerNorm(out_planes)
         self.convlr = nn.Conv2d(out_planes, out_planes, kernel_size=1, bias=True)
 
         self.convlrmatch = nn.Conv2d(out_planes//2, out_planes//2, kernel_size=1, bias=True)
@@ -316,8 +323,10 @@ class PreActBottleneckLR(nn.Module):
             lrfeats = self.convlrmatch(out) # self.convlr(out)
 
         out = torch.concat([out,lrfeats],dim=1)
+        out = out.permute(0,2,3,1)
+        out = self.convln(out)
         out = self.convlr(out)
-
+        out = out.permute(0,3,1,2)
         out = out + shortcut
         return out
 
