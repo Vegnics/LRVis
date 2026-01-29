@@ -339,7 +339,7 @@ class PreActBottleneckLR(nn.Module):
     def forward(self, x):
         out = F.relu(self.bn1(x))
         #shortcut = self.shortcut(out) if self.shortcut is not None else x
-        shortcut = self.shortcut(x) #if self.shortcut is not None else x
+        shortcut = self.shortcut(x) if self.shortcut is not None else x
         out = self.conv1(out)
         out = self.conv2(F.relu(self.bn2(out)))
         out = self.conv3(F.relu(self.bn3(out)))
