@@ -58,6 +58,28 @@ class LRGenerator(nn.Module):
         pe = get_2d_positional_encoding(N, N, nchann)      # (N, N, C)
         pe = pe.permute(2, 0, 1).unsqueeze(0)              # (1, C, N, N)
         self.register_buffer("pos_enc", pe)
+
+class _lindpout3d(nn.module):
+    def __init__(self,p:float = 0.2):
+        super().__init__()
+        self.p = p
+        self.drop = nn.Dropout3d(self.p)
+    def forward(self,x):
+        y = torch.permute(x,(0,1,4,2,3))
+        y = self.drop(y)
+        y = torch.permute(y,(0,1,3,4,2))
+        return y
+    
+class _lindpout1d(nn.module):
+    def __init__(self,p:float = 0.2):
+        super().__init__()
+        self.p = p
+        self.drop = nn.Dropout1d(self.p)
+    def forward(self,x):
+        y = torch.permute(x,(0,2,1))
+        y = self.drop(y)
+        y = torch.permute(y,(0,2,1))
+        return y
     
 class LRGenerator(nn.Module):
     def __init__(self, PatchSize, Headhdim,N,nchann,nchannout):
@@ -72,28 +94,32 @@ class LRGenerator(nn.Module):
         self.vtokenproj = nn.Sequential(
             nn.Linear(PatchSize**2,2*PatchSize**2),
             nn.GELU(),
-            nn.Dropout3d(0.1),
+            _lindpout3d(0.1),
+            #nn.Dropout3d(0.1),
             #nn.Linear(2*PatchSize**2,2*PatchSize**2),
             #nn.GELU(),
             nn.Linear(2*PatchSize**2,Headhdim)
         )
-        self.htokenproj = nn.Sequential(
+        self.htokenproj = nn.Sequential(  ## <- C x Np x Np x ps^2
             nn.Linear(PatchSize**2,2*PatchSize**2),
             nn.GELU(),
-            nn.Dropout3d(0.1),
+            _lindpout3d(0.1),
+            #nn.Dropout3d(0.1),
             #nn.Linear(2*PatchSize**2,2*PatchSize**2),
             #nn.GELU(),
             nn.Linear(2*PatchSize**2,Headhdim)
         )#nn.Linear(PatchSize**2,Headhdim)
         self.Vproj = nn.Sequential(
             nn.Linear(Headhdim * self.npatch,Headhdim * self.npatch),
-            nn.Dropout1d(0.1),
+            _lindpout1d(0.1),
+            #nn.Dropout1d(0.1),
             nn.GELU(),
             nn.Linear(Headhdim * self.npatch,self.rank * N)
             ) #nn.Linear(Headhdim * self.npatch, self.rank * N)
         self.Hproj = nn.Sequential(
             nn.Linear(Headhdim * self.npatch,Headhdim * self.npatch),
-            nn.Dropout1d(0.1),
+            _lindpout1d(0.1),
+            #nn.Dropout1d(0.1),
             nn.GELU(),
             nn.Linear(Headhdim * self.npatch,self.rank * N)
             )#nn.Linear(Headhdim * self.npatch, self.rank * N)
@@ -113,7 +139,8 @@ class LRGenerator(nn.Module):
         self.vchannlin = nn.Sequential(
             nn.Linear(nchann,nchout//2),
             nn.GELU(),
-            nn.Dropout1d(0.15),
+            _lindpout1d(0.15),
+            #nn.Dropout1d(0.15),
             nn.Linear(nchout//2,nchout//2),
             #nn.GELU(),
             #nn.Linear(nchout//2,nchout//2)
@@ -121,7 +148,8 @@ class LRGenerator(nn.Module):
         self.hchannlin = nn.Sequential(
             nn.Linear(nchann,nchout//2),
             nn.GELU(),
-            nn.Dropout1d(0.15),
+            _lindpout1d(0.15),
+            #nn.Dropout1d(0.15),
             nn.Linear(nchout//2,nchout//2),
             #nn.GELU(),
             #nn.Linear(nchout//2,nchout//2)
@@ -288,7 +316,6 @@ class PreActBottleneckLR(nn.Module):
 
     def __init__(self, in_planes, out_planes, stride=1,use_lr=False,N=32):
         super().__init__()
-        
         self.lrgen = LRGenerator(4,4,N,in_planes,out_planes) if use_lr else None
         self.convln = nn.BatchNorm2d(out_planes)
         self.convlr = nn.Conv2d(out_planes, out_planes, kernel_size=1, bias=True)
