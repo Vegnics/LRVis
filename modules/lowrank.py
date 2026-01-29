@@ -155,14 +155,14 @@ class LRGenerator(nn.Module):
             #nn.Linear(nchout//2,nchout//2)
             ) #nn.Linear(nchann,nchann//2)
         self.fbn = nn.BatchNorm2d(nchann)
-        self.dp10 = nn.Dropout2d
+        self.obn = nn.BatchNorm2d(nchannout//2)
     def forward(self, x):
         ## Patching and tokenization
         b,c,h,w = x.shape
         #print(x.shape)
         #print(self.pos_enc.shape)
-        #x = self.fbn(x)
-        y = x + 0.01*self.pos_enc # B x C x N x N
+        x = self.fbn(x)
+        y = x + self.pos_enc # B x C x N x N
         p = self.psize
         np = self.npatch
         patches = y.unfold(2, p, p).unfold(3, p, p) ## B x Np x Np x Ps x Ps
@@ -176,10 +176,10 @@ class LRGenerator(nn.Module):
         ### AGGREGATION
         # vertical component: for each column i, sum over rows j
         # vcol: (B,C,np,Headhdim)
-        vcol = vtok.sum(dim=2)
+        vcol = vtok.mean(dim=2)
         # horizontal component: for each row j, sum over cols i
         # hrow: (B,C,np,Headhdim)
-        hrow = htok.sum(dim=3)
+        hrow = htok.mean(dim=3)
 
         # flatten np tokens into one vector per channel
         # vcomp/hcomp: (B,C,Headhdim*np)
@@ -203,7 +203,7 @@ class LRGenerator(nn.Module):
         # -> (B,C,H,W)
         lrfeats = torch.einsum("bcrh,bcrw->bchw", V, Hm) + self.lrfeatbias 
 
-        return lrfeats
+        return self.obn(F.relu(lrfeats))
     """
     def forward(self, x):
         ## Patching and tokenization
@@ -318,7 +318,7 @@ class PreActBottleneckLR(nn.Module):
         super().__init__()
         self.lrgen = LRGenerator(4,4,N,in_planes,out_planes) if use_lr else None
         self.convln = nn.BatchNorm2d(out_planes)
-        self.convlr = nn.Conv2d(out_planes, out_planes, kernel_size=1, bias=True)
+        self.convlr = nn.Conv2d(out_planes, out_planes, kernel_size=1, bias=False)
 
         self.convlrmatch = nn.Conv2d(out_planes//2, out_planes//2, kernel_size=1, bias=True)
         
@@ -338,7 +338,8 @@ class PreActBottleneckLR(nn.Module):
 
     def forward(self, x):
         out = F.relu(self.bn1(x))
-        shortcut = self.shortcut(out) if self.shortcut is not None else x
+        #shortcut = self.shortcut(out) if self.shortcut is not None else x
+        shortcut = self.shortcut(x) #if self.shortcut is not None else x
         out = self.conv1(out)
         out = self.conv2(F.relu(self.bn2(out)))
         out = self.conv3(F.relu(self.bn3(out)))
@@ -352,8 +353,8 @@ class PreActBottleneckLR(nn.Module):
 
         out = torch.concat([out,lrfeats],dim=1)
         #out = out.permute(0,2,3,1)
-        out = self.convln(out)
-        out = self.convlr(out)
+        #out = self.convln(out)
+        out = F.relu(self.convlr(out))
         #out = out.permute(0,3,1,2)
         out = out + shortcut
         return out
