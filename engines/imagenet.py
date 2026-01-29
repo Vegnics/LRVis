@@ -62,7 +62,6 @@ def parse_devkit_archive(root: Union[str, Path], file: Optional[str] = None) -> 
             'ILSVRC2012_devkit_t12.tar.gz'
     """
     import scipy.io as sio
-
     def parse_meta_mat(devkit_root: str) -> tuple[dict[int, str], dict[str, tuple[str, ...]]]:
         metafile = os.path.join(devkit_root, "data", "meta.mat")
         meta = sio.loadmat(metafile, squeeze_me=True)["synsets"]
