@@ -59,7 +59,7 @@ class LRGenerator(nn.Module):
         pe = pe.permute(2, 0, 1).unsqueeze(0)              # (1, C, N, N)
         self.register_buffer("pos_enc", pe)
 
-class _lindpout3d(nn.module):
+class _lindpout3d(nn.Module):
     def __init__(self,p:float = 0.2):
         super().__init__()
         self.p = p
@@ -70,7 +70,7 @@ class _lindpout3d(nn.module):
         y = torch.permute(y,(0,1,3,4,2))
         return y
     
-class _lindpout1d(nn.module):
+class _lindpout1d(nn.Module):
     def __init__(self,p:float = 0.2):
         super().__init__()
         self.p = p
