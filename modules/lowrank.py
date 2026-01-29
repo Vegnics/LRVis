@@ -155,7 +155,7 @@ class LRGenerator(nn.Module):
             #nn.Linear(nchout//2,nchout//2)
             ) #nn.Linear(nchann,nchann//2)
         self.fbn = nn.BatchNorm2d(nchann)
-        self.obn = nn.BatchNorm2d(nchannout//2)
+        #self.obn = nn.BatchNorm2d(nchannout//2)
     def forward(self, x):
         ## Patching and tokenization
         b,c,h,w = x.shape
@@ -203,7 +203,7 @@ class LRGenerator(nn.Module):
         # -> (B,C,H,W)
         lrfeats = torch.einsum("bcrh,bcrw->bchw", V, Hm) + self.lrfeatbias 
 
-        return self.obn(F.relu(lrfeats))
+        return F.relu(lrfeats)
     """
     def forward(self, x):
         ## Patching and tokenization
@@ -353,7 +353,7 @@ class PreActBottleneckLR(nn.Module):
 
         out = torch.concat([out,lrfeats],dim=1)
         #out = out.permute(0,2,3,1)
-        #out = self.convln(out)
+        out = self.convln(out)
         out = F.relu(self.convlr(out))
         #out = out.permute(0,3,1,2)
         out = out + shortcut
