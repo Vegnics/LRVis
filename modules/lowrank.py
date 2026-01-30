@@ -296,7 +296,7 @@ class PreActBottleneck(nn.Module):
         #self.bn3 = nn.BatchNorm2d(in_planes//2)
         self.bn3 = nn.BatchNorm2d(out_planes//2)
         #self.conv3 = nn.Conv2d(in_planes//2, out_planes, kernel_size=1, bias=False)
-        self.conv3 = nn.Conv2d(in_planes//2, out_planes, kernel_size=1, bias=True)
+        self.conv3 = nn.Conv2d(out_planes//2, out_planes, kernel_size=1, bias=True)
 
         self.shortcut = None
         if stride != 1 or in_planes != out_planes:
