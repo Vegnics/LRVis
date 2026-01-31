@@ -88,39 +88,45 @@ class LRGenerator(nn.Module):
         self.npatch = N//PatchSize
         self.psize = PatchSize
         self.nchout = nchannout
+        self.nchin = nchann
         self.lrfeatbias = nn.Parameter(torch.zeros(1,nchannout//2,1,1))
         
         ## Layers
         self.vtokenproj = nn.Sequential(
+            _lindpout3d(0.1),
             nn.Linear(PatchSize**2,2*PatchSize**2),
             nn.GELU(),
-            _lindpout3d(0.1),
+            _lindpout3d(0.2),
             #nn.Dropout3d(0.1),
             #nn.Linear(2*PatchSize**2,2*PatchSize**2),
             #nn.GELU(),
             nn.Linear(2*PatchSize**2,Headhdim)
         )
         self.htokenproj = nn.Sequential(  ## <- C x Np x Np x ps^2
+            _lindpout3d(0.1),
             nn.Linear(PatchSize**2,2*PatchSize**2),
             nn.GELU(),
-            _lindpout3d(0.1),
+            _lindpout3d(0.2),
             #nn.Dropout3d(0.1),
             #nn.Linear(2*PatchSize**2,2*PatchSize**2),
             #nn.GELU(),
             nn.Linear(2*PatchSize**2,Headhdim)
         )#nn.Linear(PatchSize**2,Headhdim)
         self.Vproj = nn.Sequential(
+            _lindpout1d(0.15),
             nn.Linear(Headhdim * self.npatch,Headhdim * self.npatch),
-            _lindpout1d(0.1),
             #nn.Dropout1d(0.1),
             nn.GELU(),
+            _lindpout1d(0.1),
             nn.Linear(Headhdim * self.npatch,self.rank * N)
             ) #nn.Linear(Headhdim * self.npatch, self.rank * N)
         self.Hproj = nn.Sequential(
+            _lindpout1d(0.15),
             nn.Linear(Headhdim * self.npatch,Headhdim * self.npatch),
             _lindpout1d(0.1),
             #nn.Dropout1d(0.1),
             nn.GELU(),
+            _lindpout1d(0.1),
             nn.Linear(Headhdim * self.npatch,self.rank * N)
             )#nn.Linear(Headhdim * self.npatch, self.rank * N)
         #self.Vprojs = nn.ModuleList([nn.Linear(Headhdim*self.npatch,N*self.rank) for i in range(self.rank)])
@@ -191,19 +197,27 @@ class LRGenerator(nn.Module):
         hcomp = self.hcln(hcomp).transpose(1,2)
         
         #vcomp/hcomp : B x hdim*np x C
-        vcomp = F.gelu(self.vchannlin(vcomp).transpose(2,1))
-        hcomp = F.gelu(self.hchannlin(hcomp).transpose(2,1))
+        #vcomp = F.gelu(self.vchannlin(vcomp).transpose(2,1))
+        #hcomp = F.gelu(self.hchannlin(hcomp).transpose(2,1))
         
         # project to rank*N then reshape
         # V,H: (B,C,rank,N)
-        V = self.Vproj(vcomp).view(b, self.nchout//2, self.rank, h)
-        Hm = self.Hproj(hcomp).view(b, self.nchout//2, self.rank, w)
+        V = self.Vproj(vcomp).view(b, self.nchin, self.rank, h)
+        V = self.vchannlin(torch.permute(V,(0,2,3,1)))
+        V = torch.permute(V,(0,3,1,2))
+        V = F.gelu(V)
+        
+        Hm = self.Hproj(hcomp).view(b, self.nchin, self.rank, w)
+        Hm = self.hchannlin(torch.permute(Hm,(0,2,3,1)))
+        Hm = torch.permute(V,(0,3,1,2))
+        Hm = F.gelu(Hm)
 
         # feat: sum_r V_r[:, :, :, i] * H_r[:, :, :, j]
         # -> (B,C,H,W)
+        
         lrfeats = torch.einsum("bcrh,bcrw->bchw", V, Hm) + self.lrfeatbias 
 
-        return F.relu(lrfeats)
+        return lrfeats
     """
     def forward(self, x):
         ## Patching and tokenization
@@ -325,16 +339,16 @@ class PreActBottleneckLR(nn.Module):
         self.convln = nn.BatchNorm2d(out_planes)
         self.convlr = nn.Conv2d(out_planes, out_planes, kernel_size=1, bias=False)
 
-        self.convlrmatch = nn.Conv2d(out_planes//2, out_planes//2, kernel_size=1, bias=True)
+        self.convlrmatch = nn.Conv2d(out_planes//2, out_planes//2, kernel_size=1, bias=False)
         
         self.bn1 = nn.BatchNorm2d(in_planes)
-        self.conv1 = nn.Conv2d(in_planes, in_planes//2, kernel_size=1, bias=True)
+        self.conv1 = nn.Conv2d(in_planes, out_planes//2, kernel_size=1, bias=True)
 
-        self.bn2 = nn.BatchNorm2d(in_planes//2)
-        self.conv2 = nn.Conv2d(in_planes//2, in_planes//2, kernel_size=3, stride=stride, padding=1, bias=True)
+        self.bn2 = nn.BatchNorm2d(out_planes//2)
+        self.conv2 = nn.Conv2d(out_planes//2, out_planes//2, kernel_size=3, stride=stride, padding=1, bias=False)
 
-        self.bn3 = nn.BatchNorm2d(in_planes//2)
-        self.conv3 = nn.Conv2d(in_planes//2, out_planes//2, kernel_size=1, bias=True)
+        self.bn3 = nn.BatchNorm2d(out_planes//2)
+        self.conv3 = nn.Conv2d(out_planes//2, out_planes//2, kernel_size=1, bias=True)
         self.stride = stride
         self.shortcut = None
         if stride != 1 or in_planes != out_planes:
@@ -344,7 +358,7 @@ class PreActBottleneckLR(nn.Module):
     def forward(self, x):
         out = F.relu(self.bn1(x))
         #shortcut = self.shortcut(out) if self.shortcut is not None else x
-        shortcut = self.shortcut(x) if self.shortcut is not None else x
+        shortcut = self.shortcut(out) if self.shortcut is not None else x
         out = self.conv1(out)
         out = self.conv2(F.relu(self.bn2(out)))
         out = self.conv3(F.relu(self.bn3(out)))
@@ -359,7 +373,7 @@ class PreActBottleneckLR(nn.Module):
         out = torch.concat([out,lrfeats],dim=1)
         #out = out.permute(0,2,3,1)
         out = self.convln(out)
-        out = F.relu(self.convlr(out))
+        out = self.convlr(F.relu(out))
         #out = out.permute(0,3,1,2)
         out = out + shortcut
         return out
