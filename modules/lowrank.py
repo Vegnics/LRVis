@@ -80,6 +80,17 @@ class _lindpout1d(nn.Module):
         y = self.drop(y)
         y = torch.permute(y,(0,2,1))
         return y
+
+class _lindpout2d(nn.Module):
+    def __init__(self,p:float = 0.2):
+        super().__init__()
+        self.p = p
+        self.drop = nn.Dropout2d(self.p)
+    def forward(self,x):
+        y = torch.permute(x,(0,3,1,2))
+        y = self.drop(y)
+        y = torch.permute(y,(0,2,3,1))
+        return y
     
 class LRGenerator(nn.Module):
     def __init__(self, PatchSize, Headhdim,N,nchann,nchannout):
@@ -145,7 +156,7 @@ class LRGenerator(nn.Module):
         self.vchannlin = nn.Sequential(
             nn.Linear(nchann,nchout//2),
             nn.GELU(),
-            _lindpout3d(0.15),
+            _lindpout2d(0.15),
             #nn.Dropout1d(0.15),
             nn.Linear(nchout//2,nchout//2),
             #nn.GELU(),
@@ -154,7 +165,7 @@ class LRGenerator(nn.Module):
         self.hchannlin = nn.Sequential(
             nn.Linear(nchann,nchout//2),
             nn.GELU(),
-            _lindpout3d(0.15),
+            _lindpout2d(0.15),
             #nn.Dropout1d(0.15),
             nn.Linear(nchout//2,nchout//2),
             #nn.GELU(),
