@@ -220,7 +220,7 @@ class LRGenerator(nn.Module):
         
         Hm = self.Hproj(hcomp).view(b, self.nchin, self.rank, w)
         Hm = self.hchannlin(torch.permute(Hm,(0,2,3,1)))
-        Hm = torch.permute(V,(0,3,1,2))
+        Hm = torch.permute(Hm,(0,3,1,2))
         Hm = F.gelu(Hm)
 
         # feat: sum_r V_r[:, :, :, i] * H_r[:, :, :, j]
