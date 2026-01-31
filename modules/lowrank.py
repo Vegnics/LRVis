@@ -193,8 +193,8 @@ class LRGenerator(nn.Module):
         hcomp = hrow.reshape(b, c, -1)
         
         # vcomp : B x C x hdim*np
-        vcomp = self.vcln(vcomp).transpose(1,2)
-        hcomp = self.hcln(hcomp).transpose(1,2)
+        vcomp = self.vcln(vcomp)#.transpose(1,2)
+        hcomp = self.hcln(hcomp)#.transpose(1,2)
         
         #vcomp/hcomp : B x hdim*np x C
         #vcomp = F.gelu(self.vchannlin(vcomp).transpose(2,1))
