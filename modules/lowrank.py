@@ -145,7 +145,7 @@ class LRGenerator(nn.Module):
         self.vchannlin = nn.Sequential(
             nn.Linear(nchann,nchout//2),
             nn.GELU(),
-            _lindpout1d(0.15),
+            _lindpout3d(0.15),
             #nn.Dropout1d(0.15),
             nn.Linear(nchout//2,nchout//2),
             #nn.GELU(),
@@ -154,7 +154,7 @@ class LRGenerator(nn.Module):
         self.hchannlin = nn.Sequential(
             nn.Linear(nchann,nchout//2),
             nn.GELU(),
-            _lindpout1d(0.15),
+            _lindpout3d(0.15),
             #nn.Dropout1d(0.15),
             nn.Linear(nchout//2,nchout//2),
             #nn.GELU(),
