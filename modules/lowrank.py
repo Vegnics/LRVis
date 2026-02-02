@@ -44,6 +44,39 @@ def get_2d_positional_encoding(height, width, d_model):
     pe = torch.cat([pe_x, pe_y], dim=-1)
     return pe
 
+def get_1d_positional_encoding(length, d_model):
+    """
+    Generates a 2D sinusoidal positional encoding tensor.
+    
+    Args:
+        height (int): The height of the 2D grid.
+        width (int): The width of the 2D grid.
+        d_model (int): The dimension of the encoding vectors (must be divisible by 4).
+        
+    Returns:
+        torch.Tensor: A tensor of shape (height, width, d_model) with positional encodings.
+    """
+    #if d_model % 4 != 0:
+    #    raise ValueError("d_model must be divisible by 4 for 2D encoding.")
+        
+    # Create position indices
+    pos = torch.arange(length, dtype=torch.float32).unsqueeze(1)
+    # Create dimension indices for the frequencies
+    # d_model is split into 4 parts: sin(x), cos(x), sin(y), cos(y)
+    d_model_half = d_model // 2
+    
+    # Calculate the division term for the frequencies
+    div_term = torch.exp(torch.arange(0., d_model, 2.) * -(math.log(10000.0) / d_model))
+    
+    # Calculate 1D encodings 
+    pe = torch.zeros(length, d_model)
+    
+    # Apply sine and cosine to even and odd indices for x dimension
+    pe[:, 0::2] = torch.sin(pos * div_term)
+    pe[:, 1::2] = torch.cos(pos * div_term)
+    return pe
+
+
 class LRGenerator(nn.Module):
     def __init__(self, PatchSize, Headhdim,N,nchann):
         super().__init__()
@@ -229,6 +262,79 @@ class LRGenerator(nn.Module):
         lrfeats = torch.einsum("bcrh,bcrw->bchw", V, Hm) + self.lrfeatbias 
 
         return lrfeats
+    
+class LRGeneratorConv(nn.Module):
+    def __init__(self, PatchSize, Headhdim,N,nchann,nchannout):
+        super().__init__()
+        self.rank = 3
+        self.npatch = N//PatchSize
+        self.psize = PatchSize
+        self.nchout = nchannout
+        self.nchin = nchann
+        self.lrfeatbias = nn.Parameter(torch.zeros(1,nchannout//2,1,1))
+        ## Tokenizer
+        self.tdim = 32
+        self.tokenizer = nn.Sequential(
+            nn.BatchNorm2d(self.nchin),
+            nn.Conv2d(in_channels=self.nchin,
+                      out_channels=self.nchin,
+                      kernel_size=5,
+                      stride=4,
+                      padding=2,
+                      groups=self.nchin),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=self.nchin,
+                out_channels=self.tdim,
+                kernel_size=1,
+                stride=1,
+                padding=0
+            ),
+            nn.ReLU()
+        ) ## tdim x Np x Np, Np: N//4
+        ## Layers
+        self.channdec = nn.Sequential(
+            nn.Linear(self.tdim,self.tdim*2),
+            _lindpout1d(0.15),
+            nn.GELU(),
+            nn.Linear(self.tdim*2,self.nchout//2),
+            nn.GELU(),
+        )
+        self.hdec = nn.Sequential(
+            nn.Linear(self.tdim,self.tdim*2),
+            _lindpout1d(0.15),
+            nn.GELU(),
+            nn.Linear(self.tdim*2,N*self.rank),
+            nn.GELU()
+        )
+        self.vdec = nn.Sequential(
+            nn.Linear(self.tdim,self.tdim*2),
+            _lindpout1d(0.15),
+            nn.GELU(),
+            nn.Linear(self.tdim*2,N*self.rank),
+            nn.GELU()
+        )
+        pe = get_1d_positional_encoding((N//4)**2,self.tdim).unsqueeze(0)# (1, L, tdim)
+        #pe = pe.permute(1, 0).unsqueeze(0)              # (1, C, L)
+        self.register_buffer("pos_enc", pe)
+        
+    def forward(self, x: torch.Tensor):
+        _,_,h,w = x.shape
+        tok = self.tokenizer(x)
+        b,c,np,_ = tok.shape 
+        tok = tok.view(b,self.tdim,np**2) 
+        tok = torch.permute(tok,(0,2,1)) + self.pos_enc
+        vcomps = self.vdec(tok).mean(dim=1) 
+        vcomps = vcomps.view(b,h,self.rank) # B x h x rank
+        
+        hcomps = self.hdec(tok).mean(dim=1)
+        hcomps = hcomps.view(b,h,self.rank) # B x h x rank
+        
+        chcomps = self.channdec(tok).mean(dim=1) # B x Cout  
+        
+        lrfeats = torch.einsum("bhr,bwr->bhw", vcomps, hcomps) 
+        lrfeats = chcomps*lrfeats.unsqueeze(1) + self.lrfeatbias
+        return lrfeats
     """
     def forward(self, x):
         ## Patching and tokenization
@@ -346,7 +452,7 @@ class PreActBottleneckLR(nn.Module):
 
     def __init__(self, in_planes, out_planes, stride=1,use_lr=False,N=32):
         super().__init__()
-        self.lrgen = LRGenerator(4,4,N,in_planes,out_planes) if use_lr else None
+        self.lrgen = LRGeneratorConv(4,4,N,in_planes,out_planes) if use_lr else None
         self.convln = nn.BatchNorm2d(out_planes)
         self.convlr = nn.Conv2d(out_planes, out_planes, kernel_size=1, bias=False)
 
