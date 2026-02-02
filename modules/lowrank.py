@@ -331,6 +331,7 @@ class LRGeneratorConv(nn.Module):
         hcomps = hcomps.view(b,h,self.rank) # B x h x rank
         
         chcomps = self.channdec(tok).mean(dim=1) # B x Cout  
+        chcomps = chcomps.unsqueeze(-1).unsqueeze(-1)
         
         lrfeats = torch.einsum("bhr,bwr->bhw", vcomps, hcomps)
         print(lrfeats.shape,chcomps.shape) 
