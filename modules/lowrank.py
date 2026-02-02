@@ -334,7 +334,7 @@ class LRGeneratorConv(nn.Module):
         chcomps = chcomps.unsqueeze(-1).unsqueeze(-1)
         
         lrfeats = torch.einsum("bhr,bwr->bhw", vcomps, hcomps)
-        print(lrfeats.shape,chcomps.shape) 
+        #print(lrfeats.shape,chcomps.shape) 
         lrfeats = chcomps*lrfeats.unsqueeze(1) + self.lrfeatbias
         return lrfeats
     """
