@@ -332,7 +332,8 @@ class LRGeneratorConv(nn.Module):
         
         chcomps = self.channdec(tok).mean(dim=1) # B x Cout  
         
-        lrfeats = torch.einsum("bhr,bwr->bhw", vcomps, hcomps) 
+        lrfeats = torch.einsum("bhr,bwr->bhw", vcomps, hcomps)
+        print(lrfeats.shape,chcomps.shape) 
         lrfeats = chcomps*lrfeats.unsqueeze(1) + self.lrfeatbias
         return lrfeats
     """
