@@ -272,6 +272,8 @@ class LRGeneratorConv(nn.Module):
         self.nchout = nchannout
         self.nchin = nchann
         self.lrfeatbias = nn.Parameter(torch.zeros(1,nchannout//2,1,1))
+        self.tokwa = nn.Parameter(torch.ones(1,1,(N//4),1))
+        self.tokwb = nn.Parameter(torch.ones(1,1,1,(N//4)))
         ## Tokenizer
         self.tdim = 32
         self.tokenizer = nn.Sequential(
@@ -292,50 +294,93 @@ class LRGeneratorConv(nn.Module):
             ),
             nn.ReLU()
         ) ## tdim x Np x Np, Np: N//4
+         
+        
         ## Layers
-        self.channdec = nn.Sequential(
+        self.channdec = nn.Sequential( # Channel component generator
             nn.Linear(self.tdim,self.tdim*2),
             _lindpout1d(0.15),
             nn.GELU(),
             nn.Linear(self.tdim*2,self.nchout//2),
             nn.GELU(),
         )
-        self.hdec = nn.Sequential(
+        self.hdec = nn.Sequential( # Horizontal component generator
             nn.Linear(self.tdim,self.tdim*2),
             _lindpout1d(0.15),
             nn.GELU(),
-            nn.Linear(self.tdim*2,N*self.rank),
+            #nn.Linear(self.tdim*2,N*self.rank),
+            nn.Linear(self.tdim*2,N),
             nn.GELU()
         )
-        self.vdec = nn.Sequential(
+        self.vdec = nn.Sequential( # Vertical component generator
             nn.Linear(self.tdim,self.tdim*2),
             _lindpout1d(0.15),
             nn.GELU(),
-            nn.Linear(self.tdim*2,N*self.rank),
+            #nn.Linear(self.tdim*2,N*self.rank),
+            nn.Linear(self.tdim*2,N),
             nn.GELU()
         )
         pe = get_1d_positional_encoding((N//4)**2,self.tdim).unsqueeze(0)# (1, L, tdim)
-        #pe = pe.permute(1, 0).unsqueeze(0)              # (1, C, L)
+        #pe = pe.permute(1, 0).unsq(ueeze(0)              # (1, C, L)
+        
+        self.rankcompa = nn.Sequential(
+            _lindpout1d(0.1),
+            nn.Linear(N//4,self.rank**2)
+        )
+        
+        self.rankcompb = nn.Sequential(
+            _lindpout1d(0.1),
+            nn.Linear(N//4,self.rank**2)
+        )
+        
+        self.rankcompc = nn.Sequential(
+            _lindpout1d(0.1),
+            nn.Linear(N//4,self.rank)
+        )
+        
         self.register_buffer("pos_enc", pe)
         
     def forward(self, x: torch.Tensor):
         _,_,h,w = x.shape
         tok = self.tokenizer(x)
         b,c,np,_ = tok.shape 
-        tok = tok.view(b,self.tdim,np**2) 
+        tok = tok.view(b,self.tdim,np**2)## tdim "basis" 
         tok = torch.permute(tok,(0,2,1)) + self.pos_enc
-        vcomps = self.vdec(tok).mean(dim=1) 
-        vcomps = vcomps.view(b,h,self.rank) # B x h x rank
+        tok = torch.permute(tok,(0,2,1))
+        tok = tok.view(b,self.tdim,np,np)
+        toka = (tok*self.tokwa).mean(dim=2) # B x tdim x np   
+        tokb = (tok*self.tokwb).mean(dim=3) # B x tdim x np
+        tokr = self.rankcompa(toka) + self.rankcompb(tokb) #B x tdim x rank^2
+        tokr = torch.permute(tokr,(0,2,1)) # B x rank^2 x tdim 
         
-        hcomps = self.hdec(tok).mean(dim=1)
-        hcomps = hcomps.view(b,h,self.rank) # B x h x rank
+        tokrc = self.rankcompc(toka+tokb) 
+        tokrc = torch.permute(tokrc,(0,2,1))# B x rank x tdim 
         
-        chcomps = self.channdec(tok).mean(dim=1) # B x Cout  
-        chcomps = chcomps.unsqueeze(-1).unsqueeze(-1)
         
-        lrfeats = torch.einsum("bhr,bwr->bhw", vcomps, hcomps)
+        ## Vcomps: one per rank comp
+        #vcomps = self.vdec(tok).mean(dim=1)
+        vcomps = self.vdec(tokr)# 
+        vcomps = torch.permute(vcomps,(0,2,1)) #B x tdim x  ~好啊
+        vcomps = vcomps.view(b,h,self.rank,self.rank) # B x h x rank x rank
+        
+        ## Hcomps: one per rank comp
+        #hcomps = self.hdec(tok).mean(dim=1)# Simple averaging
+        hcomps = self.hdec(tokr)# B x tdim x h.rank
+        hcomps = torch.permute(hcomps,(0,2,1))  
+        hcomps = hcomps.view(b,h,self.rank,self.rank) # B x h x rank x rank
+        
+        ## Chcomps: one per rank comp
+        #chcomps = self.channdec(tok).mean(dim=1) # B x Cout <- averaging
+        chcomps = self.channdec(tokrc) # B x rank x Cout
+        chcomps = torch.permute(chcomps,(0,2,1)) # B x Cout x r 
+        #chcomps = chcomps.unsqueeze(-1).unsqueeze(-1)
+        
+        #lrfeats = torch.einsum("bhr,bwr->bhw", vcomps, hcomps)
+        lrfeats = torch.einsum("bhrp,bwrp->bhwr", vcomps, hcomps)
+        lrfeats = torch.einsum("bhwr,bcr->bchw", lrfeats,chcomps)
+        
         #print(lrfeats.shape,chcomps.shape) 
-        lrfeats = chcomps*lrfeats.unsqueeze(1) + self.lrfeatbias
+        #lrfeats = chcomps*lrfeats.unsqueeze(1) + self.lrfeatbias
         return lrfeats
     """
     def forward(self, x):
