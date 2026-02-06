@@ -536,7 +536,7 @@ class PreActBottleneckLR(nn.Module):
 
         out = torch.concat([out,lrfeats],dim=1)
         #out = out.permute(0,2,3,1)
-        out = self.convln(out)
+        #out = self.convln(out)
         out = self.convlr(F.relu(out))
         #out = out.permute(0,3,1,2)
         out = out + shortcut
