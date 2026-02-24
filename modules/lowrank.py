@@ -140,7 +140,7 @@ class LRGenerator(nn.Module):
             _lindpout3d(0.1),
             nn.Linear(PatchSize**2,2*PatchSize**2),
             nn.GELU(),
-            _lindpout3d(0.2),
+            _lindpout3d(0.1),
             #nn.Dropout3d(0.1),
             #nn.Linear(2*PatchSize**2,2*PatchSize**2),
             #nn.GELU(),
@@ -150,7 +150,7 @@ class LRGenerator(nn.Module):
             _lindpout3d(0.1),
             nn.Linear(PatchSize**2,2*PatchSize**2),
             nn.GELU(),
-            _lindpout3d(0.2),
+            _lindpout3d(0.1),
             #nn.Dropout3d(0.1),
             #nn.Linear(2*PatchSize**2,2*PatchSize**2),
             #nn.GELU(),
@@ -499,9 +499,12 @@ class PreActBottleneckLR(nn.Module):
 
     def __init__(self, in_planes, out_planes, stride=1,use_lr=False,N=32):
         super().__init__()
-        self.lrgen = LRGeneratorConv(4,4,N,in_planes,out_planes) if use_lr else None
+        self.lrgen = LRGenerator(4,4,N,in_planes,out_planes) if use_lr else None
+        if use_lr:
+            print("Using LR module")
         self.convln = nn.BatchNorm2d(out_planes)
         self.convlr = nn.Conv2d(out_planes, out_planes, kernel_size=1, bias=False)
+        self.lrbn = nn.BatchNorm2d(in_planes)
 
         self.convlrmatch = nn.Conv2d(out_planes//2, out_planes//2, kernel_size=1, bias=False)
         
@@ -521,13 +524,14 @@ class PreActBottleneckLR(nn.Module):
 
     def forward(self, x):
         out = F.relu(self.bn1(x))
+        outbn = self.lrbn(x)#1.0*out
         #shortcut = self.shortcut(out) if self.shortcut is not None else x
         shortcut = self.shortcut(out) if self.shortcut is not None else x
         out = self.conv1(out)
         out = self.conv2(F.relu(self.bn2(out)))
         out = self.conv3(F.relu(self.bn3(out)))
         if self.lrgen is not None:
-            lrfeats = self.lrgen(x)
+            lrfeats = self.lrgen(outbn)
             #lrfeats = self.convlr(lrfeats)
             if self.stride == 2:
                 lrfeats = F.avg_pool2d(lrfeats, kernel_size=2, stride=2)

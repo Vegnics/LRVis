@@ -1,1 +1,3 @@
 .mypy_cache
+checkpoints_stl10_256
+caltech256
