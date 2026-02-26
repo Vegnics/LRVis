@@ -9,3 +9,12 @@ iter   250/4927 | loss 7.6135 | top1 0.82% | top5 3.27% |Loss distill: 1.4087, L
 iter   300/4927 | loss 7.5266 | top1 1.00% | top5 3.83% |Loss distill: 1.3677, Loss CE: 6.7060
 [Validation] Iteration 300 | test:  loss 6.5803 top1 1.31% top5 5.11%
 iter   350/4927 | loss 7.4568 | top1 1.16% | top5 4.34% |Loss distill: 1.3387, Loss CE: 6.6536
+iter   400/4927 | loss 7.3981 | top1 1.31% | top5 4.85% |Loss distill: 1.3216, Loss CE: 6.6051
+iter   450/4927 | loss 7.3413 | top1 1.50% | top5 5.37% |Loss distill: 1.3020, Loss CE: 6.5601
+iter   500/4927 | loss 7.2913 | top1 1.67% | top5 5.86% |Loss distill: 1.2865, Loss CE: 6.5194
+iter   550/4927 | loss 7.2501 | top1 1.82% | top5 6.32% |Loss distill: 1.2771, Loss CE: 6.4838
+iter   600/4927 | loss 7.2071 | top1 2.00% | top5 6.85% |Loss distill: 1.2661, Loss CE: 6.4474
+[Validation] Iteration 600 | test:  loss 6.1783 top1 2.88% top5 10.16%
+iter   650/4927 | loss 7.1666 | top1 2.19% | top5 7.35% |Loss distill: 1.2556, Loss CE: 6.4133
+iter   700/4927 | loss 7.1299 | top1 2.37% | top5 7.88% |Loss distill: 1.2463, Loss CE: 6.3821
+iter   750/4927 | loss 7.0937 | top1 2.56% | top5 8.38% |Loss distill: 1.2373, Loss CE: 6.3513

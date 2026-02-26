@@ -459,7 +459,7 @@ class LRGeneratorConv(nn.Module):
 class PreActBottleneck(nn.Module):
     expansion = 4
 
-    def __init__(self, in_planes, out_planes, stride=1,Ni=None,isout=True**kwargs):
+    def __init__(self, in_planes, out_planes, stride=1,Ni=None,isout=True,**kwargs):
         super().__init__()
         self.ni = Ni
         self.isout = isout
