@@ -83,7 +83,7 @@ def train_one_epoch(
     tlosskd = 0.0
     
     optimizer.zero_grad(set_to_none=True)
-    f_extr = create_feature_extractor(model, ["layer1.0.interpolate","layer2.0.interpolate","layer3.0.interpolate","layer4.0.interpolate","fc"])
+    f_extr = create_feature_extractor(model, ["layer1.1.interpolate","layer2.1.interpolate","layer3.1.interpolate","layer4.1.interpolate","fc"])
     f_extr_t = create_feature_extractor(tmodel, ["layer1.1.add","layer2.1.add","layer3.1.add","layer4.1.add"])
     wce = 1.0
     wkd = 0.6
@@ -299,7 +299,7 @@ def main():
 
 
     # ---- Model ----
-    model = preact_resnet18_bottleneck(num_classes=num_classes, in_ch=3,nblocks=1,useLR=True).to(device)
+    model = preact_resnet18_bottleneck(num_classes=num_classes, in_ch=3,nblocks=2,useLR=True).to(device)
     # Load pretrained model
     model_teach = resnet18(weights="IMAGENET1K_V1")
     model_teach.eval()

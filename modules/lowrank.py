@@ -459,9 +459,10 @@ class LRGeneratorConv(nn.Module):
 class PreActBottleneck(nn.Module):
     expansion = 4
 
-    def __init__(self, in_planes, out_planes, stride=1,Ni=None,**kwargs):
+    def __init__(self, in_planes, out_planes, stride=1,Ni=None,isout=True**kwargs):
         super().__init__()
         self.ni = Ni
+        self.isout = isout
         self.bn1 = nn.BatchNorm2d(in_planes)
         #self.conv1 = nn.Conv2d(in_planes, in_planes//2, kernel_size=1, bias=False)
         self.conv1 = nn.Conv2d(in_planes, out_planes//2, kernel_size=1, bias=True)
@@ -492,15 +493,16 @@ class PreActBottleneck(nn.Module):
 
         out = out + shortcut
         out2 = F.interpolate(out, size=(self.ni,self.ni), mode='bilinear', align_corners=False)
-        return out,out2
+        return (out,out2) if self.isout else out
 
 
 class PreActBottleneckLR(nn.Module):
     expansion = 4
 
-    def __init__(self, in_planes, out_planes, stride=1,use_lr=False,N=32,Ni=32):
+    def __init__(self, in_planes, out_planes, stride=1,use_lr=False,N=32,Ni=32,isout=True):
         super().__init__()
         self.ni = Ni
+        self.isout = isout
         self.lrgen = LRGenerator(4,4,N,in_planes,out_planes) if use_lr else None
         if use_lr:
             print("Using LR module")
@@ -547,7 +549,7 @@ class PreActBottleneckLR(nn.Module):
         #out = out.permute(0,3,1,2)
         out = out + shortcut
         out2 = F.interpolate(out, size=(self.ni,self.ni), mode='bilinear', align_corners=False)
-        return out,out2
+        return (out,out2) if self.isout else out
 
 class PreActResNetExp(nn.Module):
     def __init__(self, block, num_blocks, num_classes=1000, in_ch=3):
@@ -577,6 +579,7 @@ class PreActResNetExp(nn.Module):
                 use_lr=(i == 0),
                 N=curN,
                 Ni=Ni,
+                isout=(i==(len(strides)-1))
             ))
             in_ch = oplanes
             if s == 2:
