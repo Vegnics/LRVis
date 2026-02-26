@@ -63,14 +63,21 @@ class ImageNetCustom(ImageFolder):
         self.wnids = self.classes
         self.wnid_to_idx = self.class_to_idx
         self.classes = []
+        #print(wnid_to_classes)
+        #print(self.wnids)
+        #print(wnid_to_classes["n07764155"])
+        cnt = 0
+        total = 0
         for wnid in self.wnids:
             try:
                 self.classes.append(wnid_to_classes[wnid])
+                cnt = cnt+1
             except:
                 print(f"WD {wnid} not found")
+            total = total+1
             #[wnid_to_classes[wnid] for wnid in self.wnids]
         self.class_to_idx = {cls: idx for idx, clss in enumerate(self.classes) for cls in clss}
-
+        print(f"Found {cnt} out of {total}")
     def parse_archives(self) -> None:
         if not check_integrity(os.path.join(self.root, META_FILE)):
             parse_devkit_archive(self.root)
@@ -127,6 +134,7 @@ def parse_devkit_archive(root: Union[str, Path], file: Optional[str] = None) -> 
     import scipy.io as sio
 
     def parse_meta_mat(devkit_root: str) -> tuple[dict[int, str], dict[str, tuple[str, ...]]]:
+        #/devkit-1.0
         metafile = os.path.join(devkit_root, "data", "meta.mat")
         meta = sio.loadmat(metafile, squeeze_me=True)["synsets"]
         nums_children = list(zip(*meta))[4]
@@ -160,8 +168,9 @@ def parse_devkit_archive(root: Union[str, Path], file: Optional[str] = None) -> 
 
     with get_tmp_dir() as tmp_dir:
         extract_archive(os.path.join(root, file), tmp_dir)
-
-        devkit_root = os.path.join(tmp_dir, "ILSVRC2010_devkit_t12")
+        print(os.path.join(root, file),os.listdir(tmp_dir))
+        #devkit_root = os.path.join(tmp_dir, "ILSVRC2010_devkit_t12")
+        devkit_root = os.path.join(tmp_dir, "devkit-1.0")
         idx_to_wnid, wnid_to_classes = parse_meta_mat(devkit_root)
         val_idcs = parse_val_groundtruth_txt(devkit_root)
         val_wnids = [idx_to_wnid[idx] for idx in val_idcs]

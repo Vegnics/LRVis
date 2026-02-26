@@ -1,0 +1,490 @@
+
+
+Epoch 1/100 | lr=0.01000
+iter    50/4927 | loss 8.0079 | top1 0.25% | top5 1.05% |Loss distill: 1.4530, Loss CE: 7.1361
+iter   100/4927 | loss 7.7964 | top1 0.42% | top5 1.64% |Loss distill: 1.3536, Loss CE: 6.9843
+iter   150/4927 | loss 7.6578 | top1 0.63% | top5 2.25% |Loss distill: 1.2939, Loss CE: 6.8815
+iter   200/4927 | loss 7.5570 | top1 0.77% | top5 2.76% |Loss distill: 1.2585, Loss CE: 6.8019
+iter   250/4927 | loss 7.4831 | top1 0.88% | top5 3.27% |Loss distill: 1.2387, Loss CE: 6.7398
+iter   300/4927 | loss 7.4239 | top1 1.06% | top5 3.75% |Loss distill: 1.2324, Loss CE: 6.6844
+[Validation] Iteration 300 | test:  loss 6.4883 top1 1.74% top5 5.22%
+iter   350/4927 | loss 7.3673 | top1 1.22% | top5 4.26% |Loss distill: 1.2220, Loss CE: 6.6341
+iter   400/4927 | loss 7.3169 | top1 1.40% | top5 4.81% |Loss distill: 1.2137, Loss CE: 6.5886
+iter   450/4927 | loss 7.2729 | top1 1.56% | top5 5.32% |Loss distill: 1.2086, Loss CE: 6.5477
+iter   500/4927 | loss 7.2293 | top1 1.73% | top5 5.87% |Loss distill: 1.2019, Loss CE: 6.5082
+iter   550/4927 | loss 7.1908 | top1 1.93% | top5 6.41% |Loss distill: 1.1973, Loss CE: 6.4724
+iter   600/4927 | loss 7.1539 | top1 2.12% | top5 6.93% |Loss distill: 1.1922, Loss CE: 6.4386
+[Validation] Iteration 600 | test:  loss 6.3435 top1 2.98% top5 9.13%
+iter   650/4927 | loss 7.1187 | top1 2.30% | top5 7.42% |Loss distill: 1.1882, Loss CE: 6.4057
+iter   700/4927 | loss 7.0826 | top1 2.49% | top5 7.93% |Loss distill: 1.1822, Loss CE: 6.3733
+iter   750/4927 | loss 7.0511 | top1 2.66% | top5 8.43% |Loss distill: 1.1783, Loss CE: 6.3441
+iter   800/4927 | loss 7.0226 | top1 2.80% | top5 8.85% |Loss distill: 1.1741, Loss CE: 6.3182
+iter   850/4927 | loss 6.9978 | top1 2.98% | top5 9.33% |Loss distill: 1.1764, Loss CE: 6.2920
+iter   900/4927 | loss 6.9712 | top1 3.15% | top5 9.78% |Loss distill: 1.1748, Loss CE: 6.2664
+[Validation] Iteration 900 | test:  loss 6.3004 top1 3.05% top5 10.09%
+iter   950/4927 | loss 6.9517 | top1 3.33% | top5 10.19% |Loss distill: 1.1786, Loss CE: 6.2446
+iter  1000/4927 | loss 6.9306 | top1 3.51% | top5 10.62% |Loss distill: 1.1819, Loss CE: 6.2214
+iter  1050/4927 | loss 6.9058 | top1 3.67% | top5 11.04% |Loss distill: 1.1784, Loss CE: 6.1988
+iter  1100/4927 | loss 6.8821 | top1 3.84% | top5 11.46% |Loss distill: 1.1753, Loss CE: 6.1770
+iter  1150/4927 | loss 6.8591 | top1 4.01% | top5 11.84% |Loss distill: 1.1715, Loss CE: 6.1562
+iter  1200/4927 | loss 6.8370 | top1 4.17% | top5 12.24% |Loss distill: 1.1681, Loss CE: 6.1361
+[Validation] Iteration 1200 | test:  loss 5.9291 top1 5.79% top5 16.23%
+iter  1250/4927 | loss 6.8159 | top1 4.32% | top5 12.62% |Loss distill: 1.1651, Loss CE: 6.1169
+iter  1300/4927 | loss 6.7965 | top1 4.47% | top5 12.98% |Loss distill: 1.1626, Loss CE: 6.0989
+iter  1350/4927 | loss 6.7771 | top1 4.63% | top5 13.34% |Loss distill: 1.1599, Loss CE: 6.0812
+iter  1400/4927 | loss 6.7583 | top1 4.78% | top5 13.70% |Loss distill: 1.1571, Loss CE: 6.0641
+iter  1450/4927 | loss 6.7388 | top1 4.96% | top5 14.07% |Loss distill: 1.1544, Loss CE: 6.0461
+iter  1500/4927 | loss 6.7197 | top1 5.12% | top5 14.44% |Loss distill: 1.1517, Loss CE: 6.0287
+[Validation] Iteration 1500 | test:  loss 5.8842 top1 5.82% top5 17.47%
+iter  1550/4927 | loss 6.7028 | top1 5.26% | top5 14.76% |Loss distill: 1.1496, Loss CE: 6.0130
+iter  1600/4927 | loss 6.6865 | top1 5.41% | top5 15.08% |Loss distill: 1.1478, Loss CE: 5.9978
+iter  1650/4927 | loss 6.6702 | top1 5.55% | top5 15.39% |Loss distill: 1.1456, Loss CE: 5.9828
+iter  1700/4927 | loss 6.6545 | top1 5.68% | top5 15.69% |Loss distill: 1.1437, Loss CE: 5.9683
+iter  1750/4927 | loss 6.6390 | top1 5.83% | top5 16.01% |Loss distill: 1.1418, Loss CE: 5.9539
+iter  1800/4927 | loss 6.6240 | top1 5.98% | top5 16.30% |Loss distill: 1.1401, Loss CE: 5.9400
+[Validation] Iteration 1800 | test:  loss 5.7944 top1 6.61% top5 18.68%
+iter  1850/4927 | loss 6.6103 | top1 6.09% | top5 16.58% |Loss distill: 1.1389, Loss CE: 5.9270
+iter  1900/4927 | loss 6.5967 | top1 6.22% | top5 16.86% |Loss distill: 1.1375, Loss CE: 5.9142
+iter  1950/4927 | loss 6.5829 | top1 6.35% | top5 17.14% |Loss distill: 1.1359, Loss CE: 5.9014
+iter  2000/4927 | loss 6.5686 | top1 6.50% | top5 17.44% |Loss distill: 1.1342, Loss CE: 5.8881
+iter  2050/4927 | loss 6.5552 | top1 6.63% | top5 17.72% |Loss distill: 1.1327, Loss CE: 5.8756
+iter  2100/4927 | loss 6.5421 | top1 6.77% | top5 17.99% |Loss distill: 1.1313, Loss CE: 5.8633
+[Validation] Iteration 2100 | test:  loss 5.7059 top1 7.88% top5 21.52%
+iter  2150/4927 | loss 6.5298 | top1 6.90% | top5 18.25% |Loss distill: 1.1301, Loss CE: 5.8518
+iter  2200/4927 | loss 6.5179 | top1 7.02% | top5 18.50% |Loss distill: 1.1290, Loss CE: 5.8405
+iter  2250/4927 | loss 6.5059 | top1 7.15% | top5 18.73% |Loss distill: 1.1278, Loss CE: 5.8292
+iter  2300/4927 | loss 6.4938 | top1 7.28% | top5 18.99% |Loss distill: 1.1268, Loss CE: 5.8177
+iter  2350/4927 | loss 6.4819 | top1 7.41% | top5 19.25% |Loss distill: 1.1258, Loss CE: 5.8064
+iter  2400/4927 | loss 6.4710 | top1 7.53% | top5 19.48% |Loss distill: 1.1247, Loss CE: 5.7961
+[Validation] Iteration 2400 | test:  loss 5.7994 top1 7.42% top5 19.92%
+iter  2450/4927 | loss 6.4597 | top1 7.66% | top5 19.73% |Loss distill: 1.1237, Loss CE: 5.7854
+iter  2500/4927 | loss 6.4492 | top1 7.76% | top5 19.94% |Loss distill: 1.1227, Loss CE: 5.7756
+iter  2550/4927 | loss 6.4384 | top1 7.89% | top5 20.18% |Loss distill: 1.1218, Loss CE: 5.7653
+iter  2600/4927 | loss 6.4280 | top1 8.00% | top5 20.40% |Loss distill: 1.1211, Loss CE: 5.7553
+iter  2650/4927 | loss 6.4180 | top1 8.12% | top5 20.62% |Loss distill: 1.1203, Loss CE: 5.7458
+iter  2700/4927 | loss 6.4078 | top1 8.24% | top5 20.85% |Loss distill: 1.1194, Loss CE: 5.7361
+[Validation] Iteration 2700 | test:  loss 5.7293 top1 9.69% top5 23.69%
+iter  2750/4927 | loss 6.3977 | top1 8.35% | top5 21.05% |Loss distill: 1.1188, Loss CE: 5.7264
+iter  2800/4927 | loss 6.3879 | top1 8.47% | top5 21.26% |Loss distill: 1.1181, Loss CE: 5.7170
+iter  2850/4927 | loss 6.3782 | top1 8.58% | top5 21.48% |Loss distill: 1.1174, Loss CE: 5.7078
+iter  2900/4927 | loss 6.3685 | top1 8.70% | top5 21.69% |Loss distill: 1.1167, Loss CE: 5.6985
+iter  2950/4927 | loss 6.3594 | top1 8.81% | top5 21.90% |Loss distill: 1.1162, Loss CE: 5.6896
+iter  3000/4927 | loss 6.3503 | top1 8.92% | top5 22.09% |Loss distill: 1.1157, Loss CE: 5.6809
+[Validation] Iteration 3000 | test:  loss 5.7043 top1 8.81% top5 21.98%
+iter  3050/4927 | loss 6.3415 | top1 9.03% | top5 22.29% |Loss distill: 1.1150, Loss CE: 5.6725
+iter  3100/4927 | loss 6.3333 | top1 9.12% | top5 22.47% |Loss distill: 1.1145, Loss CE: 5.6646
+iter  3150/4927 | loss 6.3245 | top1 9.23% | top5 22.67% |Loss distill: 1.1138, Loss CE: 5.6562
+iter  3200/4927 | loss 6.3162 | top1 9.32% | top5 22.86% |Loss distill: 1.1132, Loss CE: 5.6483
+iter  3250/4927 | loss 6.3079 | top1 9.42% | top5 23.05% |Loss distill: 1.1126, Loss CE: 5.6403
+iter  3300/4927 | loss 6.2997 | top1 9.52% | top5 23.23% |Loss distill: 1.1122, Loss CE: 5.6324
+[Validation] Iteration 3300 | test:  loss 5.5422 top1 10.80% top5 24.89%
+iter  3350/4927 | loss 6.2918 | top1 9.61% | top5 23.40% |Loss distill: 1.1116, Loss CE: 5.6248
+iter  3400/4927 | loss 6.2841 | top1 9.70% | top5 23.57% |Loss distill: 1.1111, Loss CE: 5.6174
+iter  3450/4927 | loss 6.2761 | top1 9.80% | top5 23.74% |Loss distill: 1.1105, Loss CE: 5.6098
+iter  3500/4927 | loss 6.2687 | top1 9.88% | top5 23.90% |Loss distill: 1.1099, Loss CE: 5.6027
+iter  3550/4927 | loss 6.2610 | top1 9.98% | top5 24.08% |Loss distill: 1.1093, Loss CE: 5.5954
+iter  3600/4927 | loss 6.2539 | top1 10.07% | top5 24.24% |Loss distill: 1.1088, Loss CE: 5.5886
+[Validation] Iteration 3600 | test:  loss 5.5029 top1 11.04% top5 25.53%
+iter  3650/4927 | loss 6.2465 | top1 10.16% | top5 24.40% |Loss distill: 1.1083, Loss CE: 5.5815
+iter  3700/4927 | loss 6.2397 | top1 10.25% | top5 24.56% |Loss distill: 1.1080, Loss CE: 5.5749
+iter  3750/4927 | loss 6.2330 | top1 10.32% | top5 24.71% |Loss distill: 1.1079, Loss CE: 5.5682
+iter  3800/4927 | loss 6.2262 | top1 10.41% | top5 24.86% |Loss distill: 1.1076, Loss CE: 5.5616
+iter  3850/4927 | loss 6.2196 | top1 10.49% | top5 25.02% |Loss distill: 1.1072, Loss CE: 5.5553
+iter  3900/4927 | loss 6.2125 | top1 10.59% | top5 25.18% |Loss distill: 1.1068, Loss CE: 5.5484
+[Validation] Iteration 3900 | test:  loss 5.5660 top1 11.01% top5 26.56%
+iter  3950/4927 | loss 6.2059 | top1 10.67% | top5 25.34% |Loss distill: 1.1065, Loss CE: 5.5420
+iter  4000/4927 | loss 6.1995 | top1 10.75% | top5 25.48% |Loss distill: 1.1061, Loss CE: 5.5358
+iter  4050/4927 | loss 6.1933 | top1 10.83% | top5 25.62% |Loss distill: 1.1057, Loss CE: 5.5299
+iter  4100/4927 | loss 6.1869 | top1 10.92% | top5 25.76% |Loss distill: 1.1053, Loss CE: 5.5238
+iter  4150/4927 | loss 6.1806 | top1 11.00% | top5 25.91% |Loss distill: 1.1048, Loss CE: 5.5177
+iter  4200/4927 | loss 6.1745 | top1 11.07% | top5 26.04% |Loss distill: 1.1043, Loss CE: 5.5119
+[Validation] Iteration 4200 | test:  loss 5.4499 top1 11.86% top5 29.12%
+iter  4250/4927 | loss 6.1682 | top1 11.15% | top5 26.18% |Loss distill: 1.1040, Loss CE: 5.5058
+iter  4300/4927 | loss 6.1622 | top1 11.22% | top5 26.31% |Loss distill: 1.1035, Loss CE: 5.5001
+iter  4350/4927 | loss 6.1561 | top1 11.30% | top5 26.45% |Loss distill: 1.1032, Loss CE: 5.4942
+iter  4400/4927 | loss 6.1503 | top1 11.38% | top5 26.59% |Loss distill: 1.1028, Loss CE: 5.4886
+iter  4450/4927 | loss 6.1447 | top1 11.45% | top5 26.72% |Loss distill: 1.1025, Loss CE: 5.4832
+iter  4500/4927 | loss 6.1392 | top1 11.52% | top5 26.84% |Loss distill: 1.1022, Loss CE: 5.4778
+[Validation] Iteration 4500 | test:  loss 5.4514 top1 11.47% top5 27.38%
+iter  4550/4927 | loss 6.1335 | top1 11.60% | top5 26.98% |Loss distill: 1.1019, Loss CE: 5.4724
+iter  4600/4927 | loss 6.1278 | top1 11.68% | top5 27.11% |Loss distill: 1.1015, Loss CE: 5.4670
+iter  4650/4927 | loss 6.1224 | top1 11.75% | top5 27.24% |Loss distill: 1.1011, Loss CE: 5.4617
+iter  4700/4927 | loss 6.1172 | top1 11.82% | top5 27.36% |Loss distill: 1.1010, Loss CE: 5.4566
+iter  4750/4927 | loss 6.1123 | top1 11.88% | top5 27.47% |Loss distill: 1.1008, Loss CE: 5.4518
+iter  4800/4927 | loss 6.1074 | top1 11.95% | top5 27.59% |Loss distill: 1.1005, Loss CE: 5.4470
+[Validation] Iteration 4800 | test:  loss 5.4046 top1 11.65% top5 29.87%
+iter  4850/4927 | loss 6.1021 | top1 12.02% | top5 27.71% |Loss distill: 1.1003, Loss CE: 5.4419
+iter  4900/4927 | loss 6.0970 | top1 12.09% | top5 27.83% |Loss distill: 1.1000, Loss CE: 5.4370
+Epoch   1 | train: loss 6.0943 top1 12.12% top5 27.89% | test:  loss 5.5007 top1 11.40% top5 27.38%
+  saved best.pt (top1=11.40%)
+
+Epoch 2/100 | lr=0.01000
+iter    50/4927 | loss 5.5910 | top1 19.08% | top5 39.47% |Loss distill: 1.0807, Loss CE: 4.9425
+iter   100/4927 | loss 5.5896 | top1 19.13% | top5 39.37% |Loss distill: 1.0749, Loss CE: 4.9447
+iter   150/4927 | loss 5.5861 | top1 19.20% | top5 39.50% |Loss distill: 1.0747, Loss CE: 4.9413
+iter   200/4927 | loss 5.5811 | top1 19.12% | top5 39.71% |Loss distill: 1.0735, Loss CE: 4.9370
+iter   250/4927 | loss 5.5867 | top1 18.98% | top5 39.63% |Loss distill: 1.0733, Loss CE: 4.9427
+iter   300/4927 | loss 5.5825 | top1 19.05% | top5 39.67% |Loss distill: 1.0722, Loss CE: 4.9392
+[Validation] Iteration 300 | test:  loss 5.8069 top1 11.47% top5 26.24%
+iter   350/4927 | loss 5.5789 | top1 19.17% | top5 39.79% |Loss distill: 1.0727, Loss CE: 4.9352
+iter   400/4927 | loss 5.5760 | top1 19.21% | top5 39.88% |Loss distill: 1.0727, Loss CE: 4.9324
+iter   450/4927 | loss 5.5729 | top1 19.21% | top5 39.97% |Loss distill: 1.0723, Loss CE: 4.9295
+iter   500/4927 | loss 5.5727 | top1 19.23% | top5 39.96% |Loss distill: 1.0720, Loss CE: 4.9295
+iter   550/4927 | loss 5.5729 | top1 19.22% | top5 39.95% |Loss distill: 1.0723, Loss CE: 4.9296
+iter   600/4927 | loss 5.5703 | top1 19.28% | top5 40.04% |Loss distill: 1.0734, Loss CE: 4.9262
+[Validation] Iteration 600 | test:  loss 5.3867 top1 13.67% top5 30.40%
+iter   650/4927 | loss 5.5678 | top1 19.30% | top5 40.10% |Loss distill: 1.0732, Loss CE: 4.9239
+iter   700/4927 | loss 5.5669 | top1 19.35% | top5 40.13% |Loss distill: 1.0733, Loss CE: 4.9229
+iter   750/4927 | loss 5.5646 | top1 19.36% | top5 40.20% |Loss distill: 1.0733, Loss CE: 4.9206
+iter   800/4927 | loss 5.5635 | top1 19.40% | top5 40.24% |Loss distill: 1.0742, Loss CE: 4.9191
+iter   850/4927 | loss 5.5617 | top1 19.40% | top5 40.31% |Loss distill: 1.0747, Loss CE: 4.9169
+iter   900/4927 | loss 5.5611 | top1 19.41% | top5 40.32% |Loss distill: 1.0746, Loss CE: 4.9163
+[Validation] Iteration 900 | test:  loss 5.3256 top1 13.07% top5 31.57%
+iter   950/4927 | loss 5.5580 | top1 19.48% | top5 40.38% |Loss distill: 1.0741, Loss CE: 4.9136
+iter  1000/4927 | loss 5.5552 | top1 19.53% | top5 40.44% |Loss distill: 1.0739, Loss CE: 4.9109
+iter  1050/4927 | loss 5.5535 | top1 19.53% | top5 40.50% |Loss distill: 1.0735, Loss CE: 4.9094
+iter  1100/4927 | loss 5.5504 | top1 19.60% | top5 40.55% |Loss distill: 1.0731, Loss CE: 4.9065
+iter  1150/4927 | loss 5.5482 | top1 19.62% | top5 40.59% |Loss distill: 1.0728, Loss CE: 4.9046
+iter  1200/4927 | loss 5.5467 | top1 19.66% | top5 40.65% |Loss distill: 1.0727, Loss CE: 4.9031
+[Validation] Iteration 1200 | test:  loss 5.3391 top1 13.21% top5 31.29%
+iter  1250/4927 | loss 5.5460 | top1 19.66% | top5 40.67% |Loss distill: 1.0721, Loss CE: 4.9027
+iter  1300/4927 | loss 5.5459 | top1 19.65% | top5 40.67% |Loss distill: 1.0722, Loss CE: 4.9026
+iter  1350/4927 | loss 5.5443 | top1 19.67% | top5 40.69% |Loss distill: 1.0721, Loss CE: 4.9011
+iter  1400/4927 | loss 5.5431 | top1 19.69% | top5 40.73% |Loss distill: 1.0719, Loss CE: 4.9000
+iter  1450/4927 | loss 5.5430 | top1 19.68% | top5 40.72% |Loss distill: 1.0721, Loss CE: 4.8998
+iter  1500/4927 | loss 5.5418 | top1 19.69% | top5 40.74% |Loss distill: 1.0719, Loss CE: 4.8986
+[Validation] Iteration 1500 | test:  loss 5.2994 top1 13.28% top5 31.18%
+iter  1550/4927 | loss 5.5399 | top1 19.72% | top5 40.80% |Loss distill: 1.0717, Loss CE: 4.8969
+iter  1600/4927 | loss 5.5388 | top1 19.72% | top5 40.82% |Loss distill: 1.0719, Loss CE: 4.8957
+iter  1650/4927 | loss 5.5375 | top1 19.73% | top5 40.86% |Loss distill: 1.0719, Loss CE: 4.8944
+iter  1700/4927 | loss 5.5360 | top1 19.76% | top5 40.90% |Loss distill: 1.0718, Loss CE: 4.8929
+iter  1750/4927 | loss 5.5338 | top1 19.80% | top5 40.95% |Loss distill: 1.0715, Loss CE: 4.8909
+iter  1800/4927 | loss 5.5326 | top1 19.83% | top5 40.97% |Loss distill: 1.0713, Loss CE: 4.8898
+[Validation] Iteration 1800 | test:  loss 5.3876 top1 13.60% top5 30.11%
+iter  1850/4927 | loss 5.5311 | top1 19.85% | top5 41.01% |Loss distill: 1.0712, Loss CE: 4.8883
+iter  1900/4927 | loss 5.5292 | top1 19.88% | top5 41.06% |Loss distill: 1.0710, Loss CE: 4.8866
+iter  1950/4927 | loss 5.5274 | top1 19.91% | top5 41.12% |Loss distill: 1.0709, Loss CE: 4.8849
+iter  2000/4927 | loss 5.5256 | top1 19.95% | top5 41.17% |Loss distill: 1.0710, Loss CE: 4.8831
+iter  2050/4927 | loss 5.5235 | top1 19.98% | top5 41.22% |Loss distill: 1.0708, Loss CE: 4.8810
+iter  2100/4927 | loss 5.5220 | top1 20.00% | top5 41.26% |Loss distill: 1.0707, Loss CE: 4.8795
+[Validation] Iteration 2100 | test:  loss 5.2850 top1 14.95% top5 32.88%
+iter  2150/4927 | loss 5.5204 | top1 20.03% | top5 41.28% |Loss distill: 1.0706, Loss CE: 4.8780
+iter  2200/4927 | loss 5.5187 | top1 20.06% | top5 41.33% |Loss distill: 1.0705, Loss CE: 4.8764
+iter  2250/4927 | loss 5.5176 | top1 20.08% | top5 41.36% |Loss distill: 1.0705, Loss CE: 4.8754
+iter  2300/4927 | loss 5.5164 | top1 20.10% | top5 41.39% |Loss distill: 1.0704, Loss CE: 4.8741
+iter  2350/4927 | loss 5.5153 | top1 20.12% | top5 41.42% |Loss distill: 1.0705, Loss CE: 4.8730
+iter  2400/4927 | loss 5.5143 | top1 20.13% | top5 41.46% |Loss distill: 1.0704, Loss CE: 4.8720
+[Validation] Iteration 2400 | test:  loss 5.3749 top1 13.81% top5 31.75%
+iter  2450/4927 | loss 5.5131 | top1 20.15% | top5 41.48% |Loss distill: 1.0703, Loss CE: 4.8709
+iter  2500/4927 | loss 5.5120 | top1 20.18% | top5 41.51% |Loss distill: 1.0703, Loss CE: 4.8698
+iter  2550/4927 | loss 5.5112 | top1 20.19% | top5 41.53% |Loss distill: 1.0702, Loss CE: 4.8690
+iter  2600/4927 | loss 5.5099 | top1 20.22% | top5 41.57% |Loss distill: 1.0704, Loss CE: 4.8676
+iter  2650/4927 | loss 5.5086 | top1 20.25% | top5 41.60% |Loss distill: 1.0704, Loss CE: 4.8663
+iter  2700/4927 | loss 5.5076 | top1 20.27% | top5 41.62% |Loss distill: 1.0704, Loss CE: 4.8654
+[Validation] Iteration 2700 | test:  loss 5.3209 top1 14.60% top5 33.10%
+iter  2750/4927 | loss 5.5063 | top1 20.29% | top5 41.66% |Loss distill: 1.0703, Loss CE: 4.8641
+iter  2800/4927 | loss 5.5055 | top1 20.31% | top5 41.67% |Loss distill: 1.0702, Loss CE: 4.8633
+iter  2850/4927 | loss 5.5044 | top1 20.32% | top5 41.71% |Loss distill: 1.0703, Loss CE: 4.8622
+iter  2900/4927 | loss 5.5036 | top1 20.34% | top5 41.72% |Loss distill: 1.0703, Loss CE: 4.8614
+iter  2950/4927 | loss 5.5019 | top1 20.37% | top5 41.77% |Loss distill: 1.0703, Loss CE: 4.8598
+iter  3000/4927 | loss 5.5006 | top1 20.39% | top5 41.80% |Loss distill: 1.0701, Loss CE: 4.8585
+[Validation] Iteration 3000 | test:  loss 5.3296 top1 13.32% top5 31.36%
+iter  3050/4927 | loss 5.4993 | top1 20.42% | top5 41.85% |Loss distill: 1.0701, Loss CE: 4.8572
+iter  3100/4927 | loss 5.4983 | top1 20.43% | top5 41.87% |Loss distill: 1.0701, Loss CE: 4.8563
+iter  3150/4927 | loss 5.4969 | top1 20.46% | top5 41.91% |Loss distill: 1.0700, Loss CE: 4.8549
+iter  3200/4927 | loss 5.4955 | top1 20.49% | top5 41.95% |Loss distill: 1.0699, Loss CE: 4.8535
+iter  3250/4927 | loss 5.4944 | top1 20.51% | top5 41.98% |Loss distill: 1.0698, Loss CE: 4.8525
+iter  3300/4927 | loss 5.4931 | top1 20.54% | top5 42.02% |Loss distill: 1.0698, Loss CE: 4.8513
+[Validation] Iteration 3300 | test:  loss 5.3280 top1 13.46% top5 30.82%
+iter  3350/4927 | loss 5.4921 | top1 20.56% | top5 42.05% |Loss distill: 1.0699, Loss CE: 4.8502
+iter  3400/4927 | loss 5.4908 | top1 20.58% | top5 42.08% |Loss distill: 1.0698, Loss CE: 4.8489
+iter  3450/4927 | loss 5.4894 | top1 20.62% | top5 42.11% |Loss distill: 1.0700, Loss CE: 4.8474
+iter  3500/4927 | loss 5.4884 | top1 20.64% | top5 42.15% |Loss distill: 1.0705, Loss CE: 4.8460
+iter  3550/4927 | loss 5.4875 | top1 20.66% | top5 42.18% |Loss distill: 1.0709, Loss CE: 4.8450
+iter  3600/4927 | loss 5.4865 | top1 20.68% | top5 42.21% |Loss distill: 1.0710, Loss CE: 4.8439
+[Validation] Iteration 3600 | test:  loss 5.3032 top1 13.96% top5 32.63%
+iter  3650/4927 | loss 5.4853 | top1 20.70% | top5 42.24% |Loss distill: 1.0710, Loss CE: 4.8427
+iter  3700/4927 | loss 5.4846 | top1 20.72% | top5 42.26% |Loss distill: 1.0710, Loss CE: 4.8420
+iter  3750/4927 | loss 5.4835 | top1 20.73% | top5 42.28% |Loss distill: 1.0709, Loss CE: 4.8409
+iter  3800/4927 | loss 5.4821 | top1 20.76% | top5 42.32% |Loss distill: 1.0709, Loss CE: 4.8396
+iter  3850/4927 | loss 5.4811 | top1 20.78% | top5 42.34% |Loss distill: 1.0709, Loss CE: 4.8386
+iter  3900/4927 | loss 5.4798 | top1 20.81% | top5 42.38% |Loss distill: 1.0708, Loss CE: 4.8373
+[Validation] Iteration 3900 | test:  loss 5.3543 top1 14.60% top5 32.46%
+iter  3950/4927 | loss 5.4790 | top1 20.83% | top5 42.40% |Loss distill: 1.0710, Loss CE: 4.8365
+iter  4000/4927 | loss 5.4782 | top1 20.84% | top5 42.42% |Loss distill: 1.0710, Loss CE: 4.8357
+iter  4050/4927 | loss 5.4772 | top1 20.86% | top5 42.46% |Loss distill: 1.0709, Loss CE: 4.8346
+iter  4100/4927 | loss 5.4760 | top1 20.88% | top5 42.49% |Loss distill: 1.0708, Loss CE: 4.8335
+iter  4150/4927 | loss 5.4751 | top1 20.90% | top5 42.51% |Loss distill: 1.0708, Loss CE: 4.8327
+iter  4200/4927 | loss 5.4740 | top1 20.92% | top5 42.55% |Loss distill: 1.0708, Loss CE: 4.8315
+[Validation] Iteration 4200 | test:  loss 5.2956 top1 16.76% top5 34.06%
+iter  4250/4927 | loss 5.4727 | top1 20.94% | top5 42.58% |Loss distill: 1.0708, Loss CE: 4.8302
+iter  4300/4927 | loss 5.4715 | top1 20.97% | top5 42.61% |Loss distill: 1.0708, Loss CE: 4.8290
+iter  4350/4927 | loss 5.4706 | top1 20.99% | top5 42.64% |Loss distill: 1.0708, Loss CE: 4.8281
+iter  4400/4927 | loss 5.4700 | top1 21.00% | top5 42.66% |Loss distill: 1.0709, Loss CE: 4.8275
+iter  4450/4927 | loss 5.4687 | top1 21.03% | top5 42.70% |Loss distill: 1.0708, Loss CE: 4.8263
+iter  4500/4927 | loss 5.4676 | top1 21.05% | top5 42.73% |Loss distill: 1.0707, Loss CE: 4.8252
+[Validation] Iteration 4500 | test:  loss 5.8092 top1 10.16% top5 24.43%
+iter  4550/4927 | loss 5.4672 | top1 21.07% | top5 42.75% |Loss distill: 1.0710, Loss CE: 4.8246
+iter  4600/4927 | loss 5.4661 | top1 21.08% | top5 42.78% |Loss distill: 1.0710, Loss CE: 4.8235
+iter  4650/4927 | loss 5.4649 | top1 21.10% | top5 42.81% |Loss distill: 1.0709, Loss CE: 4.8224
+iter  4700/4927 | loss 5.4637 | top1 21.13% | top5 42.84% |Loss distill: 1.0708, Loss CE: 4.8213
+iter  4750/4927 | loss 5.4627 | top1 21.14% | top5 42.86% |Loss distill: 1.0707, Loss CE: 4.8203
+iter  4800/4927 | loss 5.4619 | top1 21.16% | top5 42.88% |Loss distill: 1.0707, Loss CE: 4.8195
+[Validation] Iteration 4800 | test:  loss 5.3126 top1 14.45% top5 32.24%
+iter  4850/4927 | loss 5.4608 | top1 21.18% | top5 42.91% |Loss distill: 1.0706, Loss CE: 4.8185
+iter  4900/4927 | loss 5.4601 | top1 21.19% | top5 42.93% |Loss distill: 1.0705, Loss CE: 4.8178
+Epoch   2 | train: loss 5.4596 top1 21.20% top5 42.94% | test:  loss 5.3942 top1 13.89% top5 31.37%
+  saved best.pt (top1=13.89%)
+
+Epoch 3/100 | lr=0.01000
+iter    50/4927 | loss 5.3212 | top1 23.43% | top5 46.41% |Loss distill: 1.0630, Loss CE: 4.6834
+iter   100/4927 | loss 5.3317 | top1 23.34% | top5 45.89% |Loss distill: 1.0616, Loss CE: 4.6947
+iter   150/4927 | loss 5.3393 | top1 23.05% | top5 45.69% |Loss distill: 1.0613, Loss CE: 4.7025
+iter   200/4927 | loss 5.3466 | top1 23.19% | top5 45.54% |Loss distill: 1.0629, Loss CE: 4.7088
+iter   250/4927 | loss 5.3438 | top1 23.27% | top5 45.67% |Loss distill: 1.0626, Loss CE: 4.7062
+iter   300/4927 | loss 5.3440 | top1 23.20% | top5 45.70% |Loss distill: 1.0629, Loss CE: 4.7063
+[Validation] Iteration 300 | test:  loss 5.4569 top1 14.95% top5 32.67%
+iter   350/4927 | loss 5.3481 | top1 23.19% | top5 45.71% |Loss distill: 1.0635, Loss CE: 4.7100
+iter   400/4927 | loss 5.3485 | top1 23.15% | top5 45.70% |Loss distill: 1.0640, Loss CE: 4.7101
+iter   450/4927 | loss 5.3520 | top1 23.10% | top5 45.60% |Loss distill: 1.0645, Loss CE: 4.7133
+iter   500/4927 | loss 5.3525 | top1 23.18% | top5 45.63% |Loss distill: 1.0668, Loss CE: 4.7124
+iter   550/4927 | loss 5.3527 | top1 23.11% | top5 45.63% |Loss distill: 1.0677, Loss CE: 4.7121
+iter   600/4927 | loss 5.3500 | top1 23.16% | top5 45.71% |Loss distill: 1.0680, Loss CE: 4.7092
+[Validation] Iteration 600 | test:  loss 5.3615 top1 12.75% top5 31.00%
+iter   650/4927 | loss 5.3517 | top1 23.13% | top5 45.67% |Loss distill: 1.0685, Loss CE: 4.7106
+iter   700/4927 | loss 5.3499 | top1 23.17% | top5 45.70% |Loss distill: 1.0681, Loss CE: 4.7090
+iter   750/4927 | loss 5.3501 | top1 23.14% | top5 45.67% |Loss distill: 1.0680, Loss CE: 4.7094
+iter   800/4927 | loss 5.3500 | top1 23.13% | top5 45.68% |Loss distill: 1.0677, Loss CE: 4.7094
+iter   850/4927 | loss 5.3498 | top1 23.15% | top5 45.69% |Loss distill: 1.0677, Loss CE: 4.7092
+iter   900/4927 | loss 5.3501 | top1 23.11% | top5 45.69% |Loss distill: 1.0679, Loss CE: 4.7093
+[Validation] Iteration 900 | test:  loss 5.1523 top1 15.94% top5 35.97%
+iter   950/4927 | loss 5.3501 | top1 23.12% | top5 45.69% |Loss distill: 1.0681, Loss CE: 4.7092
+iter  1000/4927 | loss 5.3492 | top1 23.13% | top5 45.72% |Loss distill: 1.0679, Loss CE: 4.7085
+iter  1050/4927 | loss 5.3485 | top1 23.12% | top5 45.70% |Loss distill: 1.0677, Loss CE: 4.7079
+iter  1100/4927 | loss 5.3479 | top1 23.12% | top5 45.71% |Loss distill: 1.0674, Loss CE: 4.7074
+iter  1150/4927 | loss 5.3466 | top1 23.14% | top5 45.73% |Loss distill: 1.0672, Loss CE: 4.7062
+iter  1200/4927 | loss 5.3464 | top1 23.17% | top5 45.76% |Loss distill: 1.0671, Loss CE: 4.7062
+[Validation] Iteration 1200 | test:  loss 5.1325 top1 16.76% top5 34.48%
+iter  1250/4927 | loss 5.3449 | top1 23.22% | top5 45.81% |Loss distill: 1.0669, Loss CE: 4.7047
+iter  1300/4927 | loss 5.3447 | top1 23.21% | top5 45.82% |Loss distill: 1.0667, Loss CE: 4.7047
+iter  1350/4927 | loss 5.3439 | top1 23.25% | top5 45.85% |Loss distill: 1.0671, Loss CE: 4.7036
+iter  1400/4927 | loss 5.3434 | top1 23.26% | top5 45.87% |Loss distill: 1.0671, Loss CE: 4.7031
+iter  1450/4927 | loss 5.3438 | top1 23.26% | top5 45.88% |Loss distill: 1.0674, Loss CE: 4.7033
+iter  1500/4927 | loss 5.3425 | top1 23.29% | top5 45.90% |Loss distill: 1.0673, Loss CE: 4.7021
+[Validation] Iteration 1500 | test:  loss 5.3604 top1 13.88% top5 31.14%
+iter  1550/4927 | loss 5.3419 | top1 23.31% | top5 45.92% |Loss distill: 1.0672, Loss CE: 4.7016
+iter  1600/4927 | loss 5.3411 | top1 23.34% | top5 45.94% |Loss distill: 1.0672, Loss CE: 4.7008
+iter  1650/4927 | loss 5.3407 | top1 23.34% | top5 45.94% |Loss distill: 1.0670, Loss CE: 4.7005
+iter  1700/4927 | loss 5.3399 | top1 23.36% | top5 45.97% |Loss distill: 1.0669, Loss CE: 4.6997
+iter  1750/4927 | loss 5.3391 | top1 23.39% | top5 45.97% |Loss distill: 1.0668, Loss CE: 4.6990
+iter  1800/4927 | loss 5.3384 | top1 23.39% | top5 45.98% |Loss distill: 1.0667, Loss CE: 4.6984
+[Validation] Iteration 1800 | test:  loss 5.1332 top1 16.09% top5 34.87%
+iter  1850/4927 | loss 5.3381 | top1 23.39% | top5 45.98% |Loss distill: 1.0666, Loss CE: 4.6981
+iter  1900/4927 | loss 5.3376 | top1 23.39% | top5 45.98% |Loss distill: 1.0663, Loss CE: 4.6978
+iter  1950/4927 | loss 5.3376 | top1 23.40% | top5 46.00% |Loss distill: 1.0662, Loss CE: 4.6979
+iter  2000/4927 | loss 5.3375 | top1 23.39% | top5 46.00% |Loss distill: 1.0661, Loss CE: 4.6979
+iter  2050/4927 | loss 5.3370 | top1 23.40% | top5 46.01% |Loss distill: 1.0660, Loss CE: 4.6974
+iter  2100/4927 | loss 5.3362 | top1 23.41% | top5 46.04% |Loss distill: 1.0661, Loss CE: 4.6965
+[Validation] Iteration 2100 | test:  loss 5.2225 top1 15.94% top5 33.98%
+iter  2150/4927 | loss 5.3361 | top1 23.41% | top5 46.04% |Loss distill: 1.0662, Loss CE: 4.6964
+iter  2200/4927 | loss 5.3364 | top1 23.42% | top5 46.04% |Loss distill: 1.0663, Loss CE: 4.6966
+iter  2250/4927 | loss 5.3357 | top1 23.42% | top5 46.05% |Loss distill: 1.0663, Loss CE: 4.6960
+iter  2300/4927 | loss 5.3361 | top1 23.42% | top5 46.04% |Loss distill: 1.0665, Loss CE: 4.6962
+iter  2350/4927 | loss 5.3361 | top1 23.42% | top5 46.04% |Loss distill: 1.0666, Loss CE: 4.6961
+iter  2400/4927 | loss 5.3355 | top1 23.43% | top5 46.05% |Loss distill: 1.0664, Loss CE: 4.6957
+[Validation] Iteration 2400 | test:  loss 5.2112 top1 15.38% top5 34.55%
+iter  2450/4927 | loss 5.3352 | top1 23.43% | top5 46.06% |Loss distill: 1.0664, Loss CE: 4.6954
+iter  2500/4927 | loss 5.3345 | top1 23.44% | top5 46.08% |Loss distill: 1.0664, Loss CE: 4.6947
+iter  2550/4927 | loss 5.3341 | top1 23.45% | top5 46.08% |Loss distill: 1.0665, Loss CE: 4.6942
+iter  2600/4927 | loss 5.3333 | top1 23.46% | top5 46.10% |Loss distill: 1.0666, Loss CE: 4.6933
+iter  2650/4927 | loss 5.3329 | top1 23.47% | top5 46.11% |Loss distill: 1.0668, Loss CE: 4.6928
+iter  2700/4927 | loss 5.3328 | top1 23.47% | top5 46.11% |Loss distill: 1.0670, Loss CE: 4.6927
+[Validation] Iteration 2700 | test:  loss 5.2130 top1 14.38% top5 33.45%
+iter  2750/4927 | loss 5.3327 | top1 23.45% | top5 46.12% |Loss distill: 1.0669, Loss CE: 4.6926
+iter  2800/4927 | loss 5.3321 | top1 23.46% | top5 46.14% |Loss distill: 1.0668, Loss CE: 4.6920
+iter  2850/4927 | loss 5.3318 | top1 23.46% | top5 46.14% |Loss distill: 1.0668, Loss CE: 4.6918
+iter  2900/4927 | loss 5.3313 | top1 23.47% | top5 46.15% |Loss distill: 1.0667, Loss CE: 4.6913
+iter  2950/4927 | loss 5.3301 | top1 23.49% | top5 46.18% |Loss distill: 1.0666, Loss CE: 4.6901
+iter  3000/4927 | loss 5.3295 | top1 23.50% | top5 46.20% |Loss distill: 1.0665, Loss CE: 4.6896
+[Validation] Iteration 3000 | test:  loss 5.2506 top1 14.35% top5 33.35%
+iter  3050/4927 | loss 5.3292 | top1 23.51% | top5 46.21% |Loss distill: 1.0664, Loss CE: 4.6894
+iter  3100/4927 | loss 5.3288 | top1 23.52% | top5 46.22% |Loss distill: 1.0664, Loss CE: 4.6889
+iter  3150/4927 | loss 5.3283 | top1 23.53% | top5 46.23% |Loss distill: 1.0664, Loss CE: 4.6884
+iter  3200/4927 | loss 5.3278 | top1 23.54% | top5 46.25% |Loss distill: 1.0663, Loss CE: 4.6880
+iter  3250/4927 | loss 5.3273 | top1 23.54% | top5 46.26% |Loss distill: 1.0662, Loss CE: 4.6876
+iter  3300/4927 | loss 5.3271 | top1 23.54% | top5 46.26% |Loss distill: 1.0660, Loss CE: 4.6875
+[Validation] Iteration 3300 | test:  loss 5.0978 top1 17.15% top5 37.25%
+iter  3350/4927 | loss 5.3268 | top1 23.55% | top5 46.26% |Loss distill: 1.0660, Loss CE: 4.6873
+iter  3400/4927 | loss 5.3266 | top1 23.56% | top5 46.27% |Loss distill: 1.0661, Loss CE: 4.6869
+iter  3450/4927 | loss 5.3261 | top1 23.56% | top5 46.29% |Loss distill: 1.0661, Loss CE: 4.6865
+iter  3500/4927 | loss 5.3260 | top1 23.57% | top5 46.29% |Loss distill: 1.0662, Loss CE: 4.6863
+iter  3550/4927 | loss 5.3257 | top1 23.58% | top5 46.29% |Loss distill: 1.0662, Loss CE: 4.6860
+iter  3600/4927 | loss 5.3256 | top1 23.57% | top5 46.29% |Loss distill: 1.0662, Loss CE: 4.6859
+[Validation] Iteration 3600 | test:  loss 5.0939 top1 17.08% top5 37.78%
+iter  3650/4927 | loss 5.3248 | top1 23.59% | top5 46.30% |Loss distill: 1.0661, Loss CE: 4.6852
+iter  3700/4927 | loss 5.3245 | top1 23.59% | top5 46.31% |Loss distill: 1.0661, Loss CE: 4.6848
+iter  3750/4927 | loss 5.3237 | top1 23.60% | top5 46.33% |Loss distill: 1.0660, Loss CE: 4.6840
+iter  3800/4927 | loss 5.3232 | top1 23.62% | top5 46.35% |Loss distill: 1.0660, Loss CE: 4.6836
+iter  3850/4927 | loss 5.3228 | top1 23.63% | top5 46.36% |Loss distill: 1.0661, Loss CE: 4.6831
+iter  3900/4927 | loss 5.3222 | top1 23.64% | top5 46.38% |Loss distill: 1.0661, Loss CE: 4.6825
+[Validation] Iteration 3900 | test:  loss 5.1826 top1 15.80% top5 34.98%
+iter  3950/4927 | loss 5.3219 | top1 23.66% | top5 46.38% |Loss distill: 1.0661, Loss CE: 4.6822
+iter  4000/4927 | loss 5.3214 | top1 23.66% | top5 46.41% |Loss distill: 1.0661, Loss CE: 4.6817
+iter  4050/4927 | loss 5.3210 | top1 23.68% | top5 46.42% |Loss distill: 1.0662, Loss CE: 4.6812
+iter  4100/4927 | loss 5.3205 | top1 23.68% | top5 46.43% |Loss distill: 1.0661, Loss CE: 4.6809
+iter  4150/4927 | loss 5.3205 | top1 23.68% | top5 46.42% |Loss distill: 1.0661, Loss CE: 4.6808
+iter  4200/4927 | loss 5.3202 | top1 23.68% | top5 46.43% |Loss distill: 1.0661, Loss CE: 4.6806
+[Validation] Iteration 4200 | test:  loss 5.3043 top1 14.49% top5 33.81%
+iter  4250/4927 | loss 5.3200 | top1 23.68% | top5 46.43% |Loss distill: 1.0661, Loss CE: 4.6804
+iter  4300/4927 | loss 5.3195 | top1 23.69% | top5 46.44% |Loss distill: 1.0660, Loss CE: 4.6799
+iter  4350/4927 | loss 5.3189 | top1 23.71% | top5 46.46% |Loss distill: 1.0660, Loss CE: 4.6793
+iter  4400/4927 | loss 5.3185 | top1 23.71% | top5 46.47% |Loss distill: 1.0659, Loss CE: 4.6790
+iter  4450/4927 | loss 5.3177 | top1 23.73% | top5 46.49% |Loss distill: 1.0658, Loss CE: 4.6782
+iter  4500/4927 | loss 5.3172 | top1 23.75% | top5 46.51% |Loss distill: 1.0659, Loss CE: 4.6777
+[Validation] Iteration 4500 | test:  loss 5.2660 top1 14.38% top5 31.71%
+iter  4550/4927 | loss 5.3169 | top1 23.76% | top5 46.51% |Loss distill: 1.0659, Loss CE: 4.6774
+iter  4600/4927 | loss 5.3166 | top1 23.77% | top5 46.52% |Loss distill: 1.0659, Loss CE: 4.6771
+iter  4650/4927 | loss 5.3164 | top1 23.77% | top5 46.53% |Loss distill: 1.0660, Loss CE: 4.6767
+iter  4700/4927 | loss 5.3158 | top1 23.78% | top5 46.54% |Loss distill: 1.0660, Loss CE: 4.6762
+iter  4750/4927 | loss 5.3156 | top1 23.79% | top5 46.55% |Loss distill: 1.0660, Loss CE: 4.6760
+iter  4800/4927 | loss 5.3151 | top1 23.80% | top5 46.56% |Loss distill: 1.0660, Loss CE: 4.6756
+[Validation] Iteration 4800 | test:  loss 5.0786 top1 17.61% top5 37.89%
+iter  4850/4927 | loss 5.3145 | top1 23.81% | top5 46.57% |Loss distill: 1.0658, Loss CE: 4.6750
+iter  4900/4927 | loss 5.3142 | top1 23.81% | top5 46.57% |Loss distill: 1.0658, Loss CE: 4.6747
+Epoch   3 | train: loss 5.3140 top1 23.82% top5 46.58% | test:  loss 5.2238 top1 15.58% top5 34.73%
+  saved best.pt (top1=15.58%)
+
+Epoch 4/100 | lr=0.01000
+iter    50/4927 | loss 5.2245 | top1 25.50% | top5 48.98% |Loss distill: 1.0622, Loss CE: 4.5872
+iter   100/4927 | loss 5.2523 | top1 24.82% | top5 48.32% |Loss distill: 1.0624, Loss CE: 4.6149
+iter   150/4927 | loss 5.2585 | top1 24.71% | top5 48.09% |Loss distill: 1.0653, Loss CE: 4.6193
+iter   200/4927 | loss 5.2612 | top1 24.66% | top5 48.12% |Loss distill: 1.0690, Loss CE: 4.6198
+iter   250/4927 | loss 5.2604 | top1 24.76% | top5 48.10% |Loss distill: 1.0703, Loss CE: 4.6183
+iter   300/4927 | loss 5.2610 | top1 24.82% | top5 48.08% |Loss distill: 1.0695, Loss CE: 4.6192
+[Validation] Iteration 300 | test:  loss 5.1554 top1 16.69% top5 35.12%
+iter   350/4927 | loss 5.2586 | top1 24.86% | top5 48.13% |Loss distill: 1.0683, Loss CE: 4.6176
+iter   400/4927 | loss 5.2630 | top1 24.70% | top5 47.97% |Loss distill: 1.0675, Loss CE: 4.6225
+iter   450/4927 | loss 5.2607 | top1 24.78% | top5 48.06% |Loss distill: 1.0669, Loss CE: 4.6206
+iter   500/4927 | loss 5.2620 | top1 24.73% | top5 48.02% |Loss distill: 1.0691, Loss CE: 4.6206
+iter   550/4927 | loss 5.2638 | top1 24.69% | top5 47.97% |Loss distill: 1.0695, Loss CE: 4.6221
+iter   600/4927 | loss 5.2636 | top1 24.68% | top5 47.95% |Loss distill: 1.0699, Loss CE: 4.6216
+[Validation] Iteration 600 | test:  loss 5.1662 top1 16.80% top5 36.19%
+iter   650/4927 | loss 5.2646 | top1 24.68% | top5 47.94% |Loss distill: 1.0696, Loss CE: 4.6228
+iter   700/4927 | loss 5.2652 | top1 24.67% | top5 47.93% |Loss distill: 1.0695, Loss CE: 4.6236
+iter   750/4927 | loss 5.2659 | top1 24.65% | top5 47.92% |Loss distill: 1.0689, Loss CE: 4.6245
+iter   800/4927 | loss 5.2660 | top1 24.65% | top5 47.89% |Loss distill: 1.0687, Loss CE: 4.6248
+iter   850/4927 | loss 5.2659 | top1 24.66% | top5 47.88% |Loss distill: 1.0681, Loss CE: 4.6251
+iter   900/4927 | loss 5.2665 | top1 24.67% | top5 47.84% |Loss distill: 1.0677, Loss CE: 4.6259
+[Validation] Iteration 900 | test:  loss 5.1718 top1 16.19% top5 35.23%
+iter   950/4927 | loss 5.2659 | top1 24.70% | top5 47.86% |Loss distill: 1.0674, Loss CE: 4.6255
+iter  1000/4927 | loss 5.2646 | top1 24.75% | top5 47.92% |Loss distill: 1.0668, Loss CE: 4.6245
+iter  1050/4927 | loss 5.2650 | top1 24.73% | top5 47.91% |Loss distill: 1.0668, Loss CE: 4.6249
+iter  1100/4927 | loss 5.2643 | top1 24.74% | top5 47.91% |Loss distill: 1.0668, Loss CE: 4.6242
+iter  1150/4927 | loss 5.2635 | top1 24.73% | top5 47.90% |Loss distill: 1.0664, Loss CE: 4.6236
+iter  1200/4927 | loss 5.2630 | top1 24.75% | top5 47.90% |Loss distill: 1.0664, Loss CE: 4.6231
+[Validation] Iteration 1200 | test:  loss 5.5466 top1 13.49% top5 31.43%
+iter  1250/4927 | loss 5.2640 | top1 24.73% | top5 47.87% |Loss distill: 1.0663, Loss CE: 4.6243
+iter  1300/4927 | loss 5.2642 | top1 24.73% | top5 47.87% |Loss distill: 1.0659, Loss CE: 4.6246
+iter  1350/4927 | loss 5.2646 | top1 24.73% | top5 47.86% |Loss distill: 1.0656, Loss CE: 4.6252
+iter  1400/4927 | loss 5.2648 | top1 24.73% | top5 47.85% |Loss distill: 1.0662, Loss CE: 4.6250
+iter  1450/4927 | loss 5.2652 | top1 24.74% | top5 47.87% |Loss distill: 1.0663, Loss CE: 4.6254
+iter  1500/4927 | loss 5.2642 | top1 24.77% | top5 47.89% |Loss distill: 1.0662, Loss CE: 4.6245
+[Validation] Iteration 1500 | test:  loss 5.0409 top1 18.25% top5 38.53%
+iter  1550/4927 | loss 5.2630 | top1 24.79% | top5 47.91% |Loss distill: 1.0660, Loss CE: 4.6235
+iter  1600/4927 | loss 5.2625 | top1 24.79% | top5 47.91% |Loss distill: 1.0656, Loss CE: 4.6232
+iter  1650/4927 | loss 5.2629 | top1 24.80% | top5 47.89% |Loss distill: 1.0658, Loss CE: 4.6234
+iter  1700/4927 | loss 5.2633 | top1 24.79% | top5 47.88% |Loss distill: 1.0657, Loss CE: 4.6239
+iter  1750/4927 | loss 5.2625 | top1 24.81% | top5 47.90% |Loss distill: 1.0659, Loss CE: 4.6230
+iter  1800/4927 | loss 5.2628 | top1 24.80% | top5 47.90% |Loss distill: 1.0659, Loss CE: 4.6233
+[Validation] Iteration 1800 | test:  loss 5.2260 top1 16.37% top5 34.20%
+iter  1850/4927 | loss 5.2631 | top1 24.79% | top5 47.89% |Loss distill: 1.0658, Loss CE: 4.6236
+iter  1900/4927 | loss 5.2640 | top1 24.79% | top5 47.88% |Loss distill: 1.0660, Loss CE: 4.6244
+iter  1950/4927 | loss 5.2638 | top1 24.79% | top5 47.88% |Loss distill: 1.0659, Loss CE: 4.6242
+iter  2000/4927 | loss 5.2636 | top1 24.80% | top5 47.88% |Loss distill: 1.0659, Loss CE: 4.6240
+iter  2050/4927 | loss 5.2642 | top1 24.78% | top5 47.87% |Loss distill: 1.0662, Loss CE: 4.6245
+iter  2100/4927 | loss 5.2641 | top1 24.78% | top5 47.88% |Loss distill: 1.0662, Loss CE: 4.6244
+[Validation] Iteration 2100 | test:  loss 5.0910 top1 16.58% top5 36.08%
+iter  2150/4927 | loss 5.2647 | top1 24.77% | top5 47.88% |Loss distill: 1.0662, Loss CE: 4.6250
+iter  2200/4927 | loss 5.2648 | top1 24.75% | top5 47.87% |Loss distill: 1.0662, Loss CE: 4.6251
+iter  2250/4927 | loss 5.2647 | top1 24.75% | top5 47.87% |Loss distill: 1.0663, Loss CE: 4.6249
+iter  2300/4927 | loss 5.2650 | top1 24.75% | top5 47.86% |Loss distill: 1.0662, Loss CE: 4.6253
+iter  2350/4927 | loss 5.2651 | top1 24.74% | top5 47.85% |Loss distill: 1.0661, Loss CE: 4.6254
+iter  2400/4927 | loss 5.2647 | top1 24.74% | top5 47.85% |Loss distill: 1.0660, Loss CE: 4.6251
+[Validation] Iteration 2400 | test:  loss 5.1235 top1 17.33% top5 37.07%
+iter  2450/4927 | loss 5.2647 | top1 24.73% | top5 47.85% |Loss distill: 1.0659, Loss CE: 4.6252
+iter  2500/4927 | loss 5.2644 | top1 24.73% | top5 47.85% |Loss distill: 1.0658, Loss CE: 4.6249
+iter  2550/4927 | loss 5.2649 | top1 24.72% | top5 47.84% |Loss distill: 1.0658, Loss CE: 4.6255
+iter  2600/4927 | loss 5.2645 | top1 24.73% | top5 47.85% |Loss distill: 1.0657, Loss CE: 4.6251
+iter  2650/4927 | loss 5.2637 | top1 24.75% | top5 47.87% |Loss distill: 1.0656, Loss CE: 4.6244
+iter  2700/4927 | loss 5.2629 | top1 24.76% | top5 47.90% |Loss distill: 1.0653, Loss CE: 4.6237
+[Validation] Iteration 2700 | test:  loss 5.2096 top1 16.23% top5 34.13%
+iter  2750/4927 | loss 5.2628 | top1 24.76% | top5 47.90% |Loss distill: 1.0653, Loss CE: 4.6236
+iter  2800/4927 | loss 5.2629 | top1 24.75% | top5 47.89% |Loss distill: 1.0652, Loss CE: 4.6238
+iter  2850/4927 | loss 5.2625 | top1 24.77% | top5 47.91% |Loss distill: 1.0652, Loss CE: 4.6234
+iter  2900/4927 | loss 5.2624 | top1 24.76% | top5 47.91% |Loss distill: 1.0652, Loss CE: 4.6233
+iter  2950/4927 | loss 5.2623 | top1 24.76% | top5 47.91% |Loss distill: 1.0652, Loss CE: 4.6232
+iter  3000/4927 | loss 5.2623 | top1 24.76% | top5 47.93% |Loss distill: 1.0652, Loss CE: 4.6232
+[Validation] Iteration 3000 | test:  loss 5.2164 top1 15.80% top5 35.23%
+iter  3050/4927 | loss 5.2619 | top1 24.77% | top5 47.94% |Loss distill: 1.0652, Loss CE: 4.6227
+iter  3100/4927 | loss 5.2616 | top1 24.79% | top5 47.95% |Loss distill: 1.0652, Loss CE: 4.6224
+iter  3150/4927 | loss 5.2617 | top1 24.78% | top5 47.95% |Loss distill: 1.0652, Loss CE: 4.6226
+iter  3200/4927 | loss 5.2616 | top1 24.79% | top5 47.95% |Loss distill: 1.0652, Loss CE: 4.6225
+iter  3250/4927 | loss 5.2619 | top1 24.78% | top5 47.94% |Loss distill: 1.0652, Loss CE: 4.6227
+iter  3300/4927 | loss 5.2615 | top1 24.78% | top5 47.94% |Loss distill: 1.0653, Loss CE: 4.6224
+[Validation] Iteration 3300 | test:  loss 5.1630 top1 16.34% top5 36.47%
+iter  3350/4927 | loss 5.2611 | top1 24.79% | top5 47.96% |Loss distill: 1.0651, Loss CE: 4.6220
+iter  3400/4927 | loss 5.2610 | top1 24.78% | top5 47.96% |Loss distill: 1.0651, Loss CE: 4.6220
+iter  3450/4927 | loss 5.2610 | top1 24.79% | top5 47.95% |Loss distill: 1.0652, Loss CE: 4.6219
+iter  3500/4927 | loss 5.2614 | top1 24.79% | top5 47.95% |Loss distill: 1.0653, Loss CE: 4.6223
+iter  3550/4927 | loss 5.2609 | top1 24.80% | top5 47.96% |Loss distill: 1.0652, Loss CE: 4.6218
+iter  3600/4927 | loss 5.2610 | top1 24.80% | top5 47.97% |Loss distill: 1.0652, Loss CE: 4.6219
+[Validation] Iteration 3600 | test:  loss 5.1309 top1 17.05% top5 35.69%
+iter  3650/4927 | loss 5.2613 | top1 24.80% | top5 47.96% |Loss distill: 1.0653, Loss CE: 4.6221
+iter  3700/4927 | loss 5.2614 | top1 24.80% | top5 47.95% |Loss distill: 1.0654, Loss CE: 4.6222
+iter  3750/4927 | loss 5.2614 | top1 24.81% | top5 47.96% |Loss distill: 1.0655, Loss CE: 4.6221
+iter  3800/4927 | loss 5.2611 | top1 24.81% | top5 47.96% |Loss distill: 1.0655, Loss CE: 4.6218
+iter  3850/4927 | loss 5.2610 | top1 24.82% | top5 47.96% |Loss distill: 1.0654, Loss CE: 4.6217
+iter  3900/4927 | loss 5.2606 | top1 24.82% | top5 47.97% |Loss distill: 1.0653, Loss CE: 4.6214
+[Validation] Iteration 3900 | test:  loss 5.1166 top1 17.08% top5 36.86%
+iter  3950/4927 | loss 5.2603 | top1 24.82% | top5 47.97% |Loss distill: 1.0653, Loss CE: 4.6211
+iter  4000/4927 | loss 5.2597 | top1 24.83% | top5 47.99% |Loss distill: 1.0653, Loss CE: 4.6206
+iter  4050/4927 | loss 5.2596 | top1 24.82% | top5 47.99% |Loss distill: 1.0652, Loss CE: 4.6205
+iter  4100/4927 | loss 5.2593 | top1 24.83% | top5 47.99% |Loss distill: 1.0653, Loss CE: 4.6201
+iter  4150/4927 | loss 5.2591 | top1 24.83% | top5 48.00% |Loss distill: 1.0653, Loss CE: 4.6200
+iter  4200/4927 | loss 5.2594 | top1 24.84% | top5 47.99% |Loss distill: 1.0653, Loss CE: 4.6202
+[Validation] Iteration 4200 | test:  loss 5.2164 top1 16.44% top5 35.12%
+iter  4250/4927 | loss 5.2594 | top1 24.84% | top5 47.99% |Loss distill: 1.0653, Loss CE: 4.6202
+iter  4300/4927 | loss 5.2592 | top1 24.84% | top5 47.99% |Loss distill: 1.0653, Loss CE: 4.6200
+iter  4350/4927 | loss 5.2591 | top1 24.85% | top5 47.99% |Loss distill: 1.0653, Loss CE: 4.6199
+iter  4400/4927 | loss 5.2590 | top1 24.84% | top5 47.99% |Loss distill: 1.0653, Loss CE: 4.6199
+iter  4450/4927 | loss 5.2589 | top1 24.85% | top5 48.00% |Loss distill: 1.0653, Loss CE: 4.6197
+iter  4500/4927 | loss 5.2588 | top1 24.86% | top5 48.00% |Loss distill: 1.0653, Loss CE: 4.6196
+[Validation] Iteration 4500 | test:  loss 5.1917 top1 15.98% top5 34.77%
+iter  4550/4927 | loss 5.2586 | top1 24.86% | top5 48.00% |Loss distill: 1.0654, Loss CE: 4.6194
+iter  4600/4927 | loss 5.2585 | top1 24.86% | top5 48.00% |Loss distill: 1.0654, Loss CE: 4.6193
+iter  4650/4927 | loss 5.2581 | top1 24.86% | top5 48.01% |Loss distill: 1.0654, Loss CE: 4.6189
+iter  4700/4927 | loss 5.2578 | top1 24.86% | top5 48.02% |Loss distill: 1.0654, Loss CE: 4.6186
+iter  4750/4927 | loss 5.2578 | top1 24.87% | top5 48.02% |Loss distill: 1.0654, Loss CE: 4.6186
+iter  4800/4927 | loss 5.2574 | top1 24.87% | top5 48.03% |Loss distill: 1.0653, Loss CE: 4.6182
+[Validation] Iteration 4800 | test:  loss 5.1307 top1 16.48% top5 36.26%
+iter  4850/4927 | loss 5.2574 | top1 24.87% | top5 48.02% |Loss distill: 1.0653, Loss CE: 4.6183
+iter  4900/4927 | loss 5.2573 | top1 24.88% | top5 48.03% |Loss distill: 1.0652, Loss CE: 4.6181
+Epoch   4 | train: loss 5.2571 top1 24.88% top5 48.03% | test:  loss 5.2495 top1 15.50% top5 33.34%
+
+Epoch 5/100 | lr=0.01000
+iter    50/4927 | loss 5.1894 | top1 25.96% | top5 49.73% |Loss distill: 1.0646, Loss CE: 4.5506
+iter   100/4927 | loss 5.1990 | top1 25.71% | top5 49.25% |Loss distill: 1.0593, Loss CE: 4.5634
+iter   150/4927 | loss 5.2093 | top1 25.68% | top5 49.00% |Loss distill: 1.0659, Loss CE: 4.5698
+iter   200/4927 | loss 5.2158 | top1 25.53% | top5 49.02% |Loss distill: 1.0660, Loss CE: 4.5762
+iter   250/4927 | loss 5.2159 | top1 25.55% | top5 48.98% |Loss distill: 1.0658, Loss CE: 4.5764
+iter   300/4927 | loss 5.2207 | top1 25.40% | top5 48.94% |Loss distill: 1.0646, Loss CE: 4.5820
+[Validation] Iteration 300 | test:  loss 5.1228 top1 17.90% top5 36.79%
+iter   350/4927 | loss 5.2205 | top1 25.42% | top5 48.91% |Loss distill: 1.0637, Loss CE: 4.5823
+iter   400/4927 | loss 5.2193 | top1 25.50% | top5 48.92% |Loss distill: 1.0632, Loss CE: 4.5813
+iter   450/4927 | loss 5.2208 | top1 25.49% | top5 48.89% |Loss distill: 1.0634, Loss CE: 4.5828
+iter   500/4927 | loss 5.2212 | top1 25.51% | top5 48.89% |Loss distill: 1.0626, Loss CE: 4.5837
+iter   550/4927 | loss 5.2227 | top1 25.47% | top5 48.84% |Loss distill: 1.0623, Loss CE: 4.5854
+iter   600/4927 | loss 5.2252 | top1 25.46% | top5 48.81% |Loss distill: 1.0647, Loss CE: 4.5864
+[Validation] Iteration 600 | test:  loss 5.0570 top1 17.44% top5 36.61%
+iter   650/4927 | loss 5.2251 | top1 25.45% | top5 48.81% |Loss distill: 1.0650, Loss CE: 4.5861
+iter   700/4927 | loss 5.2275 | top1 25.46% | top5 48.77% |Loss distill: 1.0652, Loss CE: 4.5884

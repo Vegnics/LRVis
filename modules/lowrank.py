@@ -237,8 +237,8 @@ class LRGenerator(nn.Module):
         hcomp = hrow.reshape(b, c, -1)
         
         # vcomp : B x C x hdim*np
-        vcomp = self.vcln(vcomp)#.transpose(1,2)
-        hcomp = self.hcln(hcomp)#.transpose(1,2)
+        #vcomp = self.vcln(vcomp)#.transpose(1,2)
+        #hcomp = self.hcln(hcomp)#.transpose(1,2)
         
         #vcomp/hcomp : B x hdim*np x C
         #vcomp = F.gelu(self.vchannlin(vcomp).transpose(2,1))
@@ -459,9 +459,9 @@ class LRGeneratorConv(nn.Module):
 class PreActBottleneck(nn.Module):
     expansion = 4
 
-    def __init__(self, in_planes, out_planes, stride=1,**kwargs):
+    def __init__(self, in_planes, out_planes, stride=1,Ni=None,**kwargs):
         super().__init__()
-
+        self.ni = Ni
         self.bn1 = nn.BatchNorm2d(in_planes)
         #self.conv1 = nn.Conv2d(in_planes, in_planes//2, kernel_size=1, bias=False)
         self.conv1 = nn.Conv2d(in_planes, out_planes//2, kernel_size=1, bias=True)
@@ -491,14 +491,16 @@ class PreActBottleneck(nn.Module):
         out = self.conv3(F.relu(self.bn3(out)))
 
         out = out + shortcut
-        return out
+        out2 = F.interpolate(out, size=(self.ni,self.ni), mode='bilinear', align_corners=False)
+        return out,out2
 
 
 class PreActBottleneckLR(nn.Module):
     expansion = 4
 
-    def __init__(self, in_planes, out_planes, stride=1,use_lr=False,N=32):
+    def __init__(self, in_planes, out_planes, stride=1,use_lr=False,N=32,Ni=32):
         super().__init__()
+        self.ni = Ni
         self.lrgen = LRGenerator(4,4,N,in_planes,out_planes) if use_lr else None
         if use_lr:
             print("Using LR module")
@@ -524,7 +526,7 @@ class PreActBottleneckLR(nn.Module):
 
     def forward(self, x):
         out = F.relu(self.bn1(x))
-        outbn = self.lrbn(x)#1.0*out
+        outbn = 1.0*out#self.lrbn(x)#
         #shortcut = self.shortcut(out) if self.shortcut is not None else x
         shortcut = self.shortcut(out) if self.shortcut is not None else x
         out = self.conv1(out)
@@ -544,8 +546,56 @@ class PreActBottleneckLR(nn.Module):
         out = self.convlr(F.relu(out))
         #out = out.permute(0,3,1,2)
         out = out + shortcut
-        return out
+        out2 = F.interpolate(out, size=(self.ni,self.ni), mode='bilinear', align_corners=False)
+        return out,out2
 
+class PreActResNetExp(nn.Module):
+    def __init__(self, block, num_blocks, num_classes=1000, in_ch=3):
+        super().__init__()
+        self.in_planes = 64
+
+        self.conv1 = nn.Conv2d(in_ch, 64, kernel_size=7, stride=2, padding=3, bias=True)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+
+        self.layer1 = self._make_layer(block, 64,64,  num_blocks[0], stride=1,N=64,Ni=56) #512
+        self.layer2 = self._make_layer(block, 64,128, num_blocks[1], stride=2,N=64,Ni=28) #128
+        self.layer3 = self._make_layer(block, 128,256, num_blocks[2], stride=2,N=32,Ni=14) # 64
+        self.layer4 = self._make_layer(block, 256,512, num_blocks[3], stride=2,N=16,Ni=7) #32
+        self.bn_final = nn.BatchNorm2d(512)
+        self.fc = nn.Linear(512, num_classes)
+
+    def _make_layer(self, block, iplanes, oplanes, nblocks, stride, N,Ni):
+        strides = [stride] + [1] * (nblocks - 1)
+        layers = []
+        in_ch = iplanes
+        curN = N
+
+        for i, s in enumerate(strides):
+            layers.append(block(
+                in_ch, oplanes,
+                stride=s,
+                use_lr=(i == 0),
+                N=curN,
+                Ni=Ni,
+            ))
+            in_ch = oplanes
+            if s == 2:
+                curN = curN // 2  # spatial downsample happens here
+        return nn.Sequential(*layers)
+
+    def forward(self, x):
+        out = self.conv1(x)
+        out = self.maxpool(out)
+
+        out,_ = self.layer1(out)
+        out,_ = self.layer2(out)
+        out,_ = self.layer3(out)
+        out,_ = self.layer4(out)
+
+        out = F.relu(self.bn_final(out))
+        out = F.adaptive_avg_pool2d(out, 1).flatten(1)
+        out = self.fc(out)
+        return out
 
 class PreActResNet(nn.Module):
     def __init__(self, block, num_blocks, num_classes=1000, in_ch=3):
@@ -554,25 +604,13 @@ class PreActResNet(nn.Module):
 
         self.conv1 = nn.Conv2d(in_ch, 64, kernel_size=7, stride=2, padding=3, bias=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.layer1 = self._make_layer(block, 64,64,  num_blocks[0], stride=1,N=64,Ni=56) #512
+        self.layer2 = self._make_layer(block, 64,128, num_blocks[1], stride=2,N=64,Ni=28) #128
+        self.layer3 = self._make_layer(block, 128,256, num_blocks[2], stride=2,N=32,Ni=14) # 64
+        self.layer4 = self._make_layer(block, 256,512, num_blocks[3], stride=2,N=16,Ni=7) #32
+        self.bn_final = nn.BatchNorm2d(512)
+        self.fc = nn.Linear(512, num_classes)
 
-        self.layer1 = self._make_layer(block, 64,128,  num_blocks[0], stride=1,N=128) #512
-        self.layer2 = self._make_layer(block, 128,256, num_blocks[1], stride=2,N=128) #128
-        self.layer3 = self._make_layer(block, 256,512, num_blocks[2], stride=2,N=64) # 64
-        self.layer4 = self._make_layer(block, 512,512*4, num_blocks[3], stride=2,N=32) #32
-
-        self.bn_final = nn.BatchNorm2d(512 * 4)
-        self.fc = nn.Linear(512 * 4, num_classes)
-
-
-    """def _make_layer(self, block, iplanes, oplanes, nblocks, stride,N):
-        strides = [stride] + [1] * (nblocks - 1)
-        layers = []
-        in_ch = iplanes
-        for i,s in enumerate(strides):
-            layers.append(block(in_ch, oplanes, stride=s,use_lr=True if i==0 else False,N=N))
-            in_ch = oplanes
-        return nn.Sequential(*layers)
-    """
     def _make_layer(self, block, iplanes, oplanes, nblocks, stride, N):
         strides = [stride] + [1] * (nblocks - 1)
         layers = []
@@ -607,10 +645,10 @@ class PreActResNet(nn.Module):
         return out
 
 
-def preact_resnet18_bottleneck(num_classes=1000, in_ch=3,useLR=True):
+def preact_resnet18_bottleneck(num_classes=1000, in_ch=3,nblocks=1,useLR=True):
     # "ResNet-18 depth schedule" but bottleneck blocks
     block_type = PreActBottleneckLR if useLR else PreActBottleneck
-    return PreActResNet(block_type,
-                        [2, 2, 2, 2],
+    return PreActResNetExp(block_type,
+                        [nblocks, nblocks, nblocks, nblocks],
                         num_classes=num_classes,
                         in_ch=in_ch) 

@@ -5,12 +5,18 @@ from pathlib import Path
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.nn.utils import clip_grad_norm_
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
 from torch.utils.data import DataLoader,random_split
 from torchvision import datasets, transforms
 import sys,os
+
+from torchvision.models import resnet18
+from torchvision.models.feature_extraction import create_feature_extractor
+from torchvision.models.feature_extraction import get_graph_node_names
+
 
 sys.path.insert(0,os.getcwd()) 
 if "../" not in sys.path:
@@ -24,6 +30,30 @@ print(sys.path,os.getcwd())
 from modules.lowrank import preact_resnet18_bottleneck
 from utils.imagenet import ImageNetCustom
 
+class PadToSquare:
+    def __call__(self, img):
+        w, h = img.size
+        max_dim = max(w, h)
+        pad_w = max_dim - w
+        pad_h = max_dim - h
+        padding = (
+            pad_w // 2,
+            pad_h // 2,
+            pad_w - pad_w // 2,
+            pad_h - pad_h // 2,
+        )
+        return F.pad(img, padding, fill=0)
+
+def printLog(message,fname):
+    with open(fname,"a") as file:
+        file.write("\n"+message)
+    print(message)
+
+def newLog(fname):
+    with open(fname,"w") as file:
+        file.write("")
+    print(f"{fname} created succesfully!!")
+
 def accuracy_topk(logits, targets, topk=(1, 5)):
     with torch.no_grad():
         maxk = max(topk)
@@ -35,69 +65,48 @@ def accuracy_topk(logits, targets, topk=(1, 5)):
             out.append(correct[:k].reshape(-1).float().sum().mul_(100.0 / targets.size(0)))
         return out
 
-"""
-def train_one_epoch(model, loader, criterion, optimizer, device, scaler=None, log_every=50):
-    model.train()
-    total_loss, total_top1, total_top5, n = 0.0, 0.0, 0.0, 0
-    for it, (images, targets) in enumerate(loader):
-        images = images.to(device, non_blocking=True)
-        #print(images)
-        targets = targets.to(device, non_blocking=True)
-
-        optimizer.zero_grad(set_to_none=True)
-
-        if scaler is not None:
-            with torch.cuda.amp.autocast():
-                logits = model(images)
-                loss = criterion(logits, targets)
-            scaler.scale(loss).backward()
-            scaler.step(optimizer)
-            scaler.update()
-        else:
-            logits = model(images)
-            loss = criterion(logits, targets)
-            loss.backward()
-            optimizer.step()
-
-        top1, top5 = accuracy_topk(logits, targets, topk=(1, 5))
-
-        bs = images.size(0)
-        total_loss += loss.item() * bs
-        total_top1 += top1.item() * bs
-        total_top5 += top5.item() * bs
-        n += bs
-
-        if (it + 1) % log_every == 0:
-            print(
-                f"iter {it+1:5d}/{len(loader)} | "
-                f"loss {total_loss/n:.4f} | top1 {total_top1/n:.2f}% | top5 {total_top5/n:.2f}%"
-            )
-
-    return total_loss / n, total_top1 / n, total_top5 / n
-"""
-
 import torch
 from torch.nn.utils import clip_grad_norm_
 
+
+LOGNAME = "train_logger.txt"
+newLog(LOGNAME)
+
 def train_one_epoch(
-    model, loader,val_loader, criterion, optimizer, device,
+    model,tmodel, loader,val_loader, criterion,criterion_dist, optimizer, device,
     scaler=None, log_every=50,
     accum_steps=1, grad_clip=None
 ):
     model.train()
     total_loss, total_top1, total_top5, n = 0.0, 0.0, 0.0, 0
-
+    tlossce = 0.0
+    tlosskd = 0.0
+    
     optimizer.zero_grad(set_to_none=True)
-
+    f_extr = create_feature_extractor(model, ["layer1.0.interpolate","layer2.0.interpolate","layer3.0.interpolate","layer4.0.interpolate","fc"])
+    f_extr_t = create_feature_extractor(tmodel, ["layer1.1.add","layer2.1.add","layer3.1.add","layer4.1.add"])
+    wce = 1.0
+    wkd = 0.6
     for it, (images, targets) in enumerate(loader):
         images = images.to(device, non_blocking=True)
+        images_t = F.interpolate(images, size=(224,224), mode='bilinear', align_corners=False)
+        images_t = images_t.to(torch.float32)
         targets = targets.to(device, non_blocking=True)
-
         if scaler is not None:
-            with torch.cuda.amp.autocast(dtype=torch.float16):
-                logits = model(images)
-                loss = criterion(logits, targets) / accum_steps
-
+            with torch.amp.autocast("cuda",dtype=torch.float16):
+                feats = list(f_extr(images).values())
+                logits = feats[4] #model(images)
+                loss_ce = criterion(logits, targets)
+            loss_dist = 0.0
+            #feats = list(f_extr(images).values())
+            with torch.no_grad():
+                featst = list(f_extr_t(images_t).values())
+            for l in range(4):
+                vals = feats[l]
+                vals_t = featst[l]
+                loss_dist += criterion_dist(vals.to(torch.float32),vals_t.to(torch.float32))
+            loss_dist/=4
+            loss = (wce * loss_ce + wkd * loss_dist)/accum_steps
             scaler.scale(loss).backward()
 
             # step every accum_steps
@@ -111,7 +120,13 @@ def train_one_epoch(
                 optimizer.zero_grad(set_to_none=True)
         else:
             logits = model(images)
-            loss = criterion(logits, targets) / accum_steps
+            loss_ce = criterion(logits, targets) #/ accum_steps
+            loss_dist = 0.0
+            for l in range(len(layernames)):
+                vals = f_extr(model).values()[l]
+                vals_t = f_extr_t(tmodel).values()[l]
+                loss_dist += criterion_dist(vals,vals_t)
+            loss = (loss_ce+0.3*loss_dist)/accum_steps            
             loss.backward()
 
             if (it + 1) % accum_steps == 0:
@@ -125,22 +140,28 @@ def train_one_epoch(
             top1, top5 = accuracy_topk(logits, targets, topk=(1, 5))
 
         bs = images.size(0)
-        total_loss += (loss.item() * accum_steps) * bs
+        tlossce += loss_ce.item() * bs
+        tlosskd += loss_dist.item() * bs
+        total_loss += ((wce * loss_ce.item() + wkd * loss_dist.item()) * bs)
         total_top1 += top1.item() * bs
         total_top5 += top5.item() * bs
         n += bs
 
         if (it + 1) % log_every == 0:
-            print(
+            printLog(
                 f"iter {it+1:5d}/{len(loader)} | "
-                f"loss {total_loss/n:.4f} | top1 {total_top1/n:.2f}% | top5 {total_top5/n:.2f}%"
+                f"loss {total_loss/n:.4f} | top1 {total_top1/n:.2f}% | top5 {total_top5/n:.2f}% |"
+                f"Loss distill: {tlosskd/n:.4f}, Loss CE: {tlossce/n:.4f}",
+                LOGNAME
             )
+            #print(f"iter {it+1:5d}/{len(loader)}| Loss distill: {tlossce/n:.4f}, Loss CE: {tlosskd/n:.4f}")
         if ((it + 1) % (log_every*6)) == 0:
-            va_loss, va_top1, va_top5 = validate(model, val_loader, criterion, device,max_cnt=250)
-            print(
+            va_loss, va_top1, va_top5 = validate(model, val_loader, criterion, device,max_cnt=10)
+            printLog(
                 f"[Validation] Iteration {it+1:3d} | "
                 #f"train: loss {total_loss/n:.4f} top1 {total_top1/n:.2f}% top5 {total_top5/n:.2f}% | "
-                f"test:  loss {va_loss:.4f} top1 {va_top1:.2f}% top5 {va_top5:.2f}%"
+                f"test:  loss {va_loss:.4f} top1 {va_top1:.2f}% top5 {va_top5:.2f}%",
+                LOGNAME
             )
             model.train()
 
@@ -167,9 +188,10 @@ def validate(model, loader, criterion, device,max_cnt=None):
     total_loss, total_top1, total_top5, n = 0.0, 0.0, 0.0, 0
     cnt = 0 #if cnt is not None else None
     for k,(images, targets) in enumerate(loader):
-        if max_cnt is not None and (k%30)!=0:
+        if max_cnt is not None and (k%3)!=0:
             continue
         if max_cnt is not None and cnt>max_cnt:
+            print("[Validation]: Broken")
             break
         images = images.to(device, non_blocking=True)
         targets = targets.to(device, non_blocking=True)
@@ -224,27 +246,22 @@ def main():
 
     # ---- Transforms (force 256x256) ----
     train_tf = transforms.Compose([
+        #PadToSquare(),
         transforms.RandomResizedCrop(256, scale=(0.5, 1.0)),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        #transforms.Normalize(mean=(0.485, 0.456, 0.406),
-        #                     std=(0.229, 0.224, 0.225)),
+        transforms.Normalize(mean=(0.485, 0.456, 0.406),
+                             std=(0.229, 0.224, 0.225)),
     ])
     val_tf = transforms.Compose([
         #transforms.Resize(288),
+        #PadToSquare(),
         transforms.CenterCrop(256),
         transforms.ToTensor(),
-        #transforms.Normalize(mean=(0.485, 0.456, 0.406),
-        #                     std=(0.229, 0.224, 0.225)),
+        transforms.Normalize(mean=(0.485, 0.456, 0.406),
+                             std=(0.229, 0.224, 0.225)),
     ])
-    #"""
-    # ---- Caltech-256 ----
-    """full_set = datasets.Caltech256(
-        root=args.data,
-        download= True, #True,
-        transform=train_tf  # temp, we'll override val below
-    )
-    """
+
     train_set = ImageNetCustom(
         root="/home/quinoa/imagenet",
         split="train",
@@ -256,30 +273,8 @@ def main():
         split="val",
         transform=val_tf  # temp, we'll override val below
     )
-    #print(full_set.index,"\n", full_set.y)
-
-    #print(full_set)
 
     num_classes = 1000
-    #total = len(full_set)
-
-    # 90/10 train/val split
-    #train_size = int(0.4 * total)
-    #val_size = int(0.2*(total - train_size))
-    
-    #train_size = int(0.8*total)
-    #val_size = int(0.008*total)
-    
-    #val_size = int(0.015*(total - train_size))
-    #val_size = total - train_size
-    #trash_size = total - train_size - val_size
-
-    #train_set, val_set,_ = random_split(full_set, [train_size, val_size,trash_size])
-    #train_set, val_set = random_split(full_set, [train_size, val_size])
-    #print(total,train_size,val_size,trash_size)
-    # Apply val transform to val subset
-    #val_set.dataset.transform = val_tf
-
 
     train_loader = DataLoader(
         train_set,
@@ -299,74 +294,27 @@ def main():
         pin_memory=True,
         #collate_fn = collate_fn
     )
-    #"""
-
-    # ---- STL10 ----
-    """
-    train_set = datasets.STL10(root=args.data, split="train", download=True, transform=train_tf)
-    val_set = datasets.STL10(root=args.data, split="test", download=True, transform=val_tf)
-
-    train_loader = DataLoader(
-        train_set, batch_size=args.batch_size, shuffle=True,
-        num_workers=args.workers, pin_memory=True, drop_last=True
-    )
-    val_loader = DataLoader(
-        val_set, batch_size=args.batch_size, shuffle=False,
-        num_workers=args.workers, pin_memory=True
-    )
-
-    num_classes = 10
-
-
-    # ---- GTSRB ----
-    train_set = datasets.GTSRB(
-        root=args.data,
-        split="train",
-        download=True,
-        transform=train_tf
-    )
-
-    val_set = datasets.GTSRB(
-        root=args.data,
-        split="test",
-        download=True,
-        transform=val_tf
-    )
-
-    train_loader = DataLoader(
-        train_set,
-        batch_size=args.batch_size,
-        shuffle=True,
-        num_workers=args.workers,
-        pin_memory=True,
-        drop_last=True
-    )
-
-    val_loader = DataLoader(
-        val_set,
-        batch_size=args.batch_size,
-        shuffle=False,
-        num_workers=args.workers,
-        pin_memory=True
-    )
-
-    num_classes = 43
-    """
 
     print(f"Train samples: {len(train_set)} | Test samples: {len(val_set)} | Classes: {num_classes}")
 
 
     # ---- Model ----
-    model = preact_resnet18_bottleneck(num_classes=num_classes, in_ch=3,useLR=True).to(device)
-    ## Debugging the model
-    #print(model)
+    model = preact_resnet18_bottleneck(num_classes=num_classes, in_ch=3,nblocks=1,useLR=True).to(device)
+    # Load pretrained model
+    model_teach = resnet18(weights="IMAGENET1K_V1")
+    model_teach.eval()
+    train_nodes, eval_nodes = get_graph_node_names(model)
+    print(eval_nodes)
+    for p in model_teach.parameters():
+        p.requires_grad_(False)
+    model_teach.to(device)
 
     # ---- Loss / Optim / Scheduler ----
     criterion = nn.CrossEntropyLoss(label_smoothing=args.label_smoothing).to(device)
     critdistill = nn.MSELoss().to(device)
     #optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.wd)
-    optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=[0.9,0.99], weight_decay=args.wd,eps=1e-5)
-    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30,60,100,160,180], gamma=0.1)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=[0.9,0.99], weight_decay=args.wd,eps=1e-8)
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30,40,60,80,90], gamma=0.1)
 
     scaler = torch.cuda.amp.GradScaler() if (args.amp and device.type == "cuda") else None
 
@@ -387,16 +335,17 @@ def main():
     
     # ---- Train ----
     for epoch in range(start_epoch, args.epochs):
-        print(f"\nEpoch {epoch+1}/{args.epochs} | lr={optimizer.param_groups[0]['lr']:.5f}")
+        printLog(f"\nEpoch {epoch+1}/{args.epochs} | lr={optimizer.param_groups[0]['lr']:.5f}",LOGNAME)
 
         tr_loss, tr_top1, tr_top5 = train_one_epoch(
-            model, train_loader,val_loader, criterion, optimizer, device, scaler=scaler, log_every=50, accum_steps=4, grad_clip=None)
+            model,model_teach, train_loader,val_loader, criterion,critdistill, optimizer, device, scaler=scaler, log_every=50, accum_steps=4, grad_clip=None)
         va_loss, va_top1, va_top5 = validate(model, val_loader, criterion, device)
 
-        print(
+        printLog(
             f"Epoch {epoch+1:3d} | "
             f"train: loss {tr_loss:.4f} top1 {tr_top1:.2f}% top5 {tr_top5:.2f}% | "
-            f"test:  loss {va_loss:.4f} top1 {va_top1:.2f}% top5 {va_top5:.2f}%"
+            f"test:  loss {va_loss:.4f} top1 {va_top1:.2f}% top5 {va_top5:.2f}%",
+            LOGNAME
         )
 
         scheduler.step()
@@ -405,7 +354,7 @@ def main():
         if va_top1 > best_top1:
             best_top1 = va_top1
             save_checkpoint(save_dir / "best.pt", model, optimizer, epoch, best_top1)
-            print(f"  saved best.pt (top1={best_top1:.2f}%)")
+            printLog(f"  saved best.pt (top1={best_top1:.2f}%)",LOGNAME)
 
     print("\nDone. Best top1:", best_top1)
 
@@ -415,8 +364,8 @@ sys.argv = [
     "train_stl10_256.py",
     "--data", "../curated",
     "--epochs", "100",
-    "--batch-size", "80",
-    "--lr", "0.001",
+    "--batch-size", "256",
+    "--lr", "0.01",
     "--amp",
     "--label-smoothing", "0.15",
 ]
