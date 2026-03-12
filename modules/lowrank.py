@@ -298,8 +298,8 @@ class LRGeneratorExp(nn.Module):
         self.psize = PatchSize
         self.nchout = nchannout
         self.nchin = nchann
-        self.lrfeatbias = nn.Parameter(torch.zeros(1,nchannout//2,1,1))
-        BTSIZE = 4*Headhdim
+        #self.lrfeatbias = nn.Parameter(torch.zeros(1,nchannout//2,1,1))
+        BTSIZE = 8*Headhdim
         print("LR Generator patching")
         if down:
             self.inconv = nn.Conv2d(nchann,nchann,
@@ -329,10 +329,10 @@ class LRGeneratorExp(nn.Module):
             nn.Linear(BTSIZE,BTSIZE//2),
             nn.GELU(),
             _lindpout2d(0.1),
-            nn.Linear(BTSIZE//2,BTSIZE//2),
+            nn.Linear(BTSIZE//2,BTSIZE),
             nn.GELU(),
             _lindpout2d(0.1),
-            nn.Linear(BTSIZE//2,Headhdim)
+            nn.Linear(BTSIZE,Headhdim)
         )
 
         self.htokenproj = nn.Sequential(  ## <- C x Np x Np x ps^2
@@ -340,10 +340,10 @@ class LRGeneratorExp(nn.Module):
             nn.Linear(BTSIZE,BTSIZE//2),
             nn.GELU(),
             _lindpout2d(0.1),
-            nn.Linear(BTSIZE//2,BTSIZE//2),
+            nn.Linear(BTSIZE//2,BTSIZE),
             nn.GELU(),
             _lindpout2d(0.1),
-            nn.Linear(BTSIZE//2,Headhdim)
+            nn.Linear(BTSIZE,Headhdim)
         )
 
         self.Vproj = nn.Sequential(
@@ -370,7 +370,7 @@ class LRGeneratorExp(nn.Module):
         pe = pe.permute(2, 0, 1).unsqueeze(0)              # (1, C, N, N)
         self.register_buffer("pos_enc", pe)
 
-        self.Btok = BTokenizer(nblocks=4,nin=self.psize**2,nout=BTSIZE)
+        self.Btok = BTokenizer(nblocks=6,nin=self.psize**2,nout=BTSIZE)
         
         nchout = self.nchout # nchann
         self.vchannlin = nn.Sequential(
@@ -394,9 +394,9 @@ class LRGeneratorExp(nn.Module):
 
     def forward(self, x):
         ## Patching and tokenization
-        y = self.inbn(x)
+        #y = self.inbn(x)
         #skip = self.skip(y)
-        y = self.inconv(y)
+        y = self.inconv(x)
         
         b,c,h,w = y.shape
         y = self.perchanntok(y)
@@ -430,7 +430,7 @@ class LRGeneratorExp(nn.Module):
         # feat: sum_r V_r[:, :, :, i] * H_r[:, :, :, j]
         # -> (B,C,H,W)
         
-        lrfeats = torch.einsum("bcrh,bcrw->bchw", V, Hm) + self.lrfeatbias 
+        lrfeats = torch.einsum("bcrh,bcrw->bchw", V, Hm) #+ self.lrfeatbias 
 
         return lrfeats#+skip
 
@@ -1088,8 +1088,9 @@ class PreActResNetAdapt(nn.Module):
         return out
 
 class _resnetBlockLR(nn.Module):
-    def __init__(self,cin,cout,N,psize,hdim,linear=True):
+    def __init__(self,cin,cout,N,psize,hdim,linear=True,use_lr=True):
         super().__init__()
+        self.use_lr = use_lr
         self.conv11 = nn.Conv2d(cin,cout//2, kernel_size=3, stride=2,padding=1,bias=False)
         self.bn11 = nn.BatchNorm2d(cout//2)
         self.conv12 = nn.Conv2d(cout//2,cout//2, kernel_size=3, stride=1,padding=1,bias=False)
@@ -1098,30 +1099,55 @@ class _resnetBlockLR(nn.Module):
                 nn.Conv2d(cin,cout, kernel_size=1, stride=2, bias=False),
                 nn.BatchNorm2d(cout))
         #ksize,stride, Headhdim,N,nchann,nchannout,down=False
-        #self.lr1 = LRGeneratorExp(psize,hdim,N=N,nchann=cin,nchannout=cout,down=True)
-        self.lr1 = LRGeneratorExp2(3,2,hdim,N=N,nchann=cin,nchannout=cout,down=True)
-        self.outlin1 = nn.Conv2d(cout,cout, kernel_size=1, stride=1,bias=False)
+        if use_lr:
+            self.lr1 = LRGeneratorExp(psize,hdim,N=N,nchann=cin,nchannout=cout,down=True)
+        #self.lr1 = LRGeneratorExp2(3,2,hdim,N=N,nchann=cin,nchannout=cout,down=True)
+        self.bno1 = nn.BatchNorm2d(cout)
+        if use_lr:
+            self.outlin1 = nn.Conv2d(cout,cout, kernel_size=1, stride=1,bias=False)
+        else:
+            self.outlin1 = nn.Conv2d(cout//2,cout, kernel_size=1, stride=1,bias=False)
         
         self.conv21 = nn.Conv2d(cout,cout//2, kernel_size=3, stride=1,padding=1,bias=False)
         self.bn21 = nn.BatchNorm2d(cout//2)
         self.conv22 = nn.Conv2d(cout//2,cout//2, kernel_size=3, stride=1,padding=1,bias=False)
         self.bn22 = nn.BatchNorm2d(cout//2)
-        #self.lr2 = LRGeneratorExp(psize,hdim,N=N//2,nchann=cout,nchannout=cout)
-        self.lr2 = LRGeneratorExp2(3,2,hdim,N=N//2,nchann=cout,nchannout=cout)
-        self.outlin2 = nn.Conv2d(cout,cout, kernel_size=1, stride=1,bias=False)
-
-    def forward(self,x):
+        if use_lr:
+            self.lr2 = LRGeneratorExp(psize,hdim,N=N//2,nchann=cout,nchannout=cout)
+        #self.lr2 = LRGeneratorExp2(3,2,hdim,N=N//2,nchann=cout,nchannout=cout)
+        self.bno2 = nn.BatchNorm2d(cout)
+        if use_lr:
+            self.outlin2 = nn.Conv2d(cout,cout, kernel_size=1, stride=1,bias=False)
+        else:
+            self.outlin2 = nn.Conv2d(cout//2,cout, kernel_size=1, stride=1,bias=False)
+    def _forwardlr(self,x):
         skip = self.skip1(x)
         lr = self.lr1(x)
         out = F.relu(self.bn11(self.conv11(x)))
         out = self.bn12(self.conv12(out))
-        out = F.relu(self.outlin1(torch.concat([out,lr],dim=1))+skip)
+        out = F.relu(self.outlin1(self.bno1(torch.concat([out,lr],dim=1)))+skip)
         skip = 1.0*out
         lr = self.lr2(out)
         out = F.relu(self.bn21(self.conv21(out)))
         out = self.bn22(self.conv22(out))
-        out = F.relu(self.outlin2(torch.concat([out,lr],dim=1))+skip)
+        out = F.relu(self.outlin2(self.bno2(torch.concat([out,lr],dim=1)))+skip)
         return out
+    
+    def _forwardconv(self,x):
+        skip = self.skip1(x)
+        out = F.relu(self.bn11(self.conv11(x)))
+        out = self.bn12(self.conv12(out))
+        out = F.relu(self.outlin1(out)+skip)
+        skip = 1.0*out
+        out = F.relu(self.bn21(self.conv21(out)))
+        out = self.bn22(self.conv22(out))
+        out = F.relu(self.outlin2(out)+skip)
+        return out
+    def forward(self,x):
+        if self.use_lr:
+            return self._forwardlr(x)
+        else:
+            return self._forwardconv(x)
 
     
 class _resConvBlock(nn.Module):
@@ -1675,19 +1701,19 @@ class ResNetOriginalLR(nn.Module):
         self.conv12 = _resConvBlock(self.frozmodel.layer1,1,64,64,False)
         self.conv21 = _resConvBlock(self.frozmodel.layer2,0,128,128,False)
         self.conv22 = _resConvBlock(self.frozmodel.layer2,1,128,128,False)
-        self.conv31 = _resConvBlock(self.frozmodel.layer3,0,256,256,False)
-        self.conv32 = _resConvBlock(self.frozmodel.layer3,1,256,256,False)
+        #self.conv31 = _resConvBlock(self.frozmodel.layer3,0,256,256,False)
+        #self.conv32 = _resConvBlock(self.frozmodel.layer3,1,256,256,False)
         #self.conv41 = _resConvBlock(self.frozmodel.layer4,0,512,512,False)
         #self.conv42 = _resConvBlock(self.frozmodel.layer4,1,512,512,False)
         
         ## ResnetLR
         #self.reslr = _resnetBlockLR(cin=256,cout=512,N=16,psize=2,hdim=4)
-        #self.reslr = _resnetBlockLR(cin=128,cout=256,N=32,psize=4,hdim=16)
+        self.reslr = _resnetBlockLR(cin=128,cout=256,N=32,psize=4,hdim=16)
         self.reslr2 = _resnetBlockLR(cin=256,cout=512,N=16,psize=2,hdim=8)
         
         ## Skip layers
         self.skip2 = copy.deepcopy(self.frozmodel.layer2[0].downsample)
-        self.skip3 = copy.deepcopy(self.frozmodel.layer3[0].downsample)
+        #self.skip3 = copy.deepcopy(self.frozmodel.layer3[0].downsample)
         #self.skip4 = copy.deepcopy(self.frozmodel.layer4[0].downsample)
         self.fc = nn.Linear(512, num_classes)
         self.freeze_backbone()
@@ -1700,12 +1726,12 @@ class ResNetOriginalLR(nn.Module):
             self.conv12,
             self.conv21,
             self.conv22,
-            self.conv31,
-            self.conv32,
+            #self.conv31,
+            #self.conv32,
             #self.conv41,
             #self.conv42,
             self.skip2,
-            self.skip3,
+            #self.skip3,
             #self.skip4,
         ]
 
@@ -1735,11 +1761,11 @@ class ResNetOriginalLR(nn.Module):
         out = addrelu(out,self.conv21,skip2)
         out = addrelu(out,self.conv22,out)
         
-        skip3 = self.skip3(out)
-        out = addrelu(out,self.conv31,skip3)
-        out = addrelu(out,self.conv32,out)
+        #skip3 = self.skip3(out)
+        #out = addrelu(out,self.conv31,skip3)
+        #out = addrelu(out,self.conv32,out)
         
-        #out = self.reslr(out)
+        out = self.reslr(out)
         out = self.reslr2(out)
         #skip4 = self.skip4(out)
         #out = addrelu(out,self.conv41,skip4)
