@@ -1828,7 +1828,7 @@ class PreActResNet(nn.Module):
 
 def preact_resnet18_bottleneck(num_classes=1000, in_ch=3,nblocks=1,useLR=True):
     # "ResNet-18 depth schedule" but bottleneck blocks
-    #block_type = PreActBottleneckLRAdapt if useLR else PreActBottleneck
+    block_type = PreActBottleneckLRAdapt if useLR else PreActBottleneck
     return ResNetOriginalLR(block_type,
                         [nblocks, nblocks, nblocks, nblocks],
                         num_classes=num_classes,
