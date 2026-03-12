@@ -1687,7 +1687,7 @@ class ResNetOriginal(nn.Module):
         return out
     
 class ResNetOriginalLR(nn.Module):
-    def __init__(self, block, num_blocks, num_classes=1000, in_ch=3):
+    def __init__(self, block, num_blocks, num_classes=1000, in_ch=3,use_lr=True):
         super().__init__()
         self.frozmodel = models.resnet18(weights="IMAGENET1K_V1")
         ### Copy the stem for 256x256 inputs
@@ -1708,8 +1708,8 @@ class ResNetOriginalLR(nn.Module):
         
         ## ResnetLR
         #self.reslr = _resnetBlockLR(cin=256,cout=512,N=16,psize=2,hdim=4)
-        self.reslr = _resnetBlockLR(cin=128,cout=256,N=32,psize=4,hdim=16)
-        self.reslr2 = _resnetBlockLR(cin=256,cout=512,N=16,psize=2,hdim=8)
+        self.reslr = _resnetBlockLR(cin=128,cout=256,N=32,psize=4,hdim=16,use_lr=use_lr)
+        self.reslr2 = _resnetBlockLR(cin=256,cout=512,N=16,psize=2,hdim=8,use_lr=use_lr)
         
         ## Skip layers
         self.skip2 = copy.deepcopy(self.frozmodel.layer2[0].downsample)
@@ -1828,8 +1828,9 @@ class PreActResNet(nn.Module):
 
 def preact_resnet18_bottleneck(num_classes=1000, in_ch=3,nblocks=1,useLR=True):
     # "ResNet-18 depth schedule" but bottleneck blocks
-    block_type = PreActBottleneckLRAdapt if useLR else PreActBottleneck
+    #block_type = PreActBottleneckLRAdapt if useLR else PreActBottleneck
     return ResNetOriginalLR(block_type,
                         [nblocks, nblocks, nblocks, nblocks],
                         num_classes=num_classes,
-                        in_ch=in_ch) 
+                        in_ch=in_ch,
+                        use_lr=useLR) 
