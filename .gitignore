@@ -2,3 +2,5 @@
 checkpoints_stl10_256
 caltech256
 ./train_logger.txt
+pre-trained/
+train_logger*

@@ -80,7 +80,7 @@ import torch
 from torch.nn.utils import clip_grad_norm_
 
 
-LOGNAME = "train_logger_2.txt"
+LOGNAME = "train_logger_3.txt"
 newLog(LOGNAME)
 
 def train_one_epoch(
@@ -406,11 +406,11 @@ def main():
 
         scheduler.step()
         ## best_test.pt
-        save_checkpoint(save_dir / "last_seq8.pt", model, optimizer, epoch, best_top1)
+        save_checkpoint(save_dir / "last_seq10.pt", model, optimizer, epoch, best_top1)
         if va_top1 > best_top1:
             best_top1 = va_top1
-            save_checkpoint(save_dir / "best_seq8.pt", model, optimizer, epoch, best_top1)
-            printLog(f"  saved best_seq8.pt (top1={best_top1:.2f}%)",LOGNAME)
+            save_checkpoint(save_dir / "best_seq10.pt", model, optimizer, epoch, best_top1)
+            printLog(f"  saved best_seq10.pt (top1={best_top1:.2f}%)",LOGNAME)
 
         """
         save_checkpoint(save_dir / "last_distill_partial_res22.pt", model, optimizer, epoch, best_top1)
