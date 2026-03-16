@@ -298,6 +298,8 @@ class LRGeneratorExp(nn.Module):
         self.psize = PatchSize
         self.nchout = nchannout
         self.nchin = nchann
+        self.last_V = None
+        self.last_H = None
         #self.lrfeatbias = nn.Parameter(torch.zeros(1,nchannout//2,1,1))
         BTSIZE = 8*Headhdim
         print("LR Generator patching")
@@ -391,6 +393,10 @@ class LRGeneratorExp(nn.Module):
             ) #nn.Linear(nchann,nchann//2)
         
         self.inbn = nn.BatchNorm2d(nchann)
+        
+        self.outconv = nn.Conv2d(nchout//2,nchout//2,
+                                    kernel_size=1,
+                                    bias=False)
 
     def forward(self, x):
         ## Patching and tokenization
@@ -400,6 +406,7 @@ class LRGeneratorExp(nn.Module):
         
         b,c,h,w = y.shape
         y = self.perchanntok(y)
+        y = F.relu(self.inbn(y))
         y = y + self.pos_enc # B x C x N x N
         p = self.psize
         np = self.npatch
@@ -424,6 +431,7 @@ class LRGeneratorExp(nn.Module):
         #V = F.layer_norm(V, normalized_shape=(self.rank,),weight=None,bias=None,eps=1e-5)
         V = self.vchannlin(torch.permute(V,(0,3,2,1))) # (B,H,R,C)
         V = torch.permute(V,(0,3,2,1)) # # (B,C,R,H)
+        self.last_V = V
         #V = F.gelu(V)
         
         Hm = self.Hproj(hcomp).view(b, self.nchin, self.rank, w)
@@ -431,6 +439,7 @@ class LRGeneratorExp(nn.Module):
         #Hm = F.layer_norm(Hm, normalized_shape=(self.rank,),weight=None,bias=None,eps=1e-5)
         Hm = self.hchannlin(torch.permute(Hm,(0,3,2,1)))
         Hm = torch.permute(Hm,(0,3,2,1))
+        self.last_H = Hm
         #Hm = F.gelu(Hm)
 
         # feat: sum_r V_r[:, :, :, i] * H_r[:, :, :, j]
@@ -438,18 +447,26 @@ class LRGeneratorExp(nn.Module):
         
         lrfeats = torch.einsum("bcrh,bcrw->bchw", V, Hm) #+ self.lrfeatbias 
 
-        return lrfeats#+skip
+        return self.outconv(lrfeats)#+skip
 
 class LRGeneratorExp2(nn.Module):
     def __init__(self,ksize,stride, Headhdim,N,nchann,nchannout,down=False):
         super().__init__()
-        self.rank = 3
+        self.rank = 4
         self.effN = N//2 if down  else N
         self.npatch = self.effN//stride
         self.nchout = nchannout
         self.nchin = nchann
         self.lrfeatbias = nn.Parameter(torch.zeros(1,nchannout//2,1,1))
         BTSIZE = 4*Headhdim
+        print("LR Generator CONV patching")
+        
+        ## Additional params
+        self.vpos = nn.Parameter(torch.randn(1, 1, self.npatch, 1, BTSIZE) * 0.02)
+        self.hpos = nn.Parameter(torch.randn(1, 1, 1, self.npatch, BTSIZE) * 0.02)
+
+        self.vscore = nn.Linear(BTSIZE, 1)
+        self.hscore = nn.Linear(BTSIZE, 1)
         
         pad = ksize // 2
         self.emb = nn.Sequential(
@@ -465,12 +482,13 @@ class LRGeneratorExp2(nn.Module):
         )
         
         if down:
-            self.inconv = nn.Conv2d(nchann,nchann,
-                                    kernel_size=3,
-                                    stride=2,
-                                    padding=1,
-                                    bias=False,
-                                    groups=nchann)
+            #self.inconv = nn.Conv2d(nchann,nchann,
+            #                        kernel_size=3,
+            #                        stride=2,
+            #                        padding=1,
+            #                        bias=False,
+            #                        groups=nchann)
+            self.inconv = nn.AvgPool2d(kernel_size=2, stride=2) #nn.AdaptiveAvgPool2d(self.effN)
         else:
             self.inconv = nn.Identity()
 
@@ -524,29 +542,35 @@ class LRGeneratorExp2(nn.Module):
             #nn.GELU()
             )
         
+        
         nchout = self.nchout # nchann
         self.vchannlin = nn.Sequential(
-            nn.Linear(nchann,nchout//2),
+            nn.Linear(nchann,nchout//4),
             nn.GELU(),
             _lindpout2d(0.1),
-            nn.Linear(nchout//2,nchout//2),
+            nn.Linear(nchout//4,nchout//2),
             #nn.GELU(),
             #nn.Linear(nchout//2,nchout//2)
             )##nn.Linear(nchann,nchann//2)
         self.hchannlin = nn.Sequential(
-            nn.Linear(nchann,nchout//2),
+            nn.Linear(nchann,nchout//4),
             nn.GELU(),
             _lindpout2d(0.1),
-            nn.Linear(nchout//2,nchout//2),
+            nn.Linear(nchout//4,nchout//2),
             #nn.GELU(),
             #nn.Linear(nchout//2,nchout//2)
             ) #nn.Linear(nchann,nchann//2)
         
         self.inbn = nn.BatchNorm2d(nchann)
+        
+        self.outconv = nn.Conv2d(nchout//2,nchout//2,
+                                    kernel_size=1,
+                                    bias=False)
 
     def forward(self, x):
         ## Patching and tokenization
-        y = self.inbn(self.inconv(x))
+        #y = F.relu(self.inbn(self.inconv(x)))
+        y = self.inconv(x)
         b,c,h,w = y.shape
         ## Raw Patch tokenizer
         emb = self.emb(y)              # B x tdim x Np x Np
@@ -555,11 +579,24 @@ class LRGeneratorExp2(nn.Module):
         emb = emb.permute(0, 2, 3, 1).unsqueeze(1)        # B x 1 x Np x Np x tdim
         patcher = patcher.unsqueeze(-1)                   # B x C x Np x Np x 1
 
-        tokens = emb*(1.0 + patcher) 
-        
+        tokens = emb*patcher #emb*(1.0 + patcher) 
+        #"""
+        tokens_v = tokens + self.vpos
+        scores_v = self.vscore(tokens_v)                  # (B,C,Np,Np,1)
+        alpha_v = torch.softmax(scores_v, dim=2)         # over collapsed vertical axis
+        vagg = (alpha_v * tokens).sum(dim=2)             # (B,C,Np,T)
+
+        tokens_h = tokens + self.hpos
+        scores_h = self.hscore(tokens_h)                  # (B,C,Np,Np,1)
+        alpha_h = torch.softmax(scores_h, dim=3)          # over collapsed horizontal axis
+        hagg = (alpha_h * tokens).sum(dim=3)              # (B,C,Np,T)
+        #"""
         ## Vertical / Horizontal tokens
-        vtok = F.gelu(self.vtokenproj(tokens.mean(dim=2)))
-        htok = F.gelu(self.htokenproj(tokens.mean(dim=3)))
+        #vtok = F.gelu(self.vtokenproj(tokens.mean(dim=2)))
+        #htok = F.gelu(self.htokenproj(tokens.mean(dim=3)))
+        
+        vtok = F.gelu(self.vtokenproj(vagg))
+        htok = F.gelu(self.htokenproj(hagg))
 
         # flatten np tokens into one vector per channel
         # vcomp/hcomp: (B,C,Headhdim*np)
@@ -569,19 +606,21 @@ class LRGeneratorExp2(nn.Module):
         V = self.Vproj(vcomp).view(b, self.nchin, self.rank, h)
         V = self.vchannlin(torch.permute(V,(0,2,3,1)))
         V = torch.permute(V,(0,3,1,2))
+        self.last_V = V
         #V = F.gelu(V)
         
         Hm = self.Hproj(hcomp).view(b, self.nchin, self.rank, w)
         Hm = self.hchannlin(torch.permute(Hm,(0,2,3,1)))
         Hm = torch.permute(Hm,(0,3,1,2))
+        self.last_H = Hm
         #Hm = F.gelu(Hm)
 
         # feat: sum_r V_r[:, :, :, i] * H_r[:, :, :, j]
         # -> (B,C,H,W)
         
-        lrfeats = torch.einsum("bcrh,bcrw->bchw", V, Hm) + self.lrfeatbias 
+        lrfeats = torch.einsum("bcrh,bcrw->bchw", V, Hm) #+ self.lrfeatbias 
 
-        return lrfeats
+        return self.outconv(lrfeats)
 
 class LRGeneratorConv(nn.Module):
     def __init__(self, PatchSize, Headhdim,N,nchann,nchannout):
@@ -1094,20 +1133,26 @@ class PreActResNetAdapt(nn.Module):
         return out
 
 class _resnetBlockLR(nn.Module):
-    def __init__(self,cin,cout,N,psize,hdim,linear=True,use_lr=True):
+    def __init__(self,cin,cout,N,psize,hdim,linear=True,use_lr=True,down=True):
         super().__init__()
         self.use_lr = use_lr
-        self.conv11 = nn.Conv2d(cin,cout//2, kernel_size=3, stride=2,padding=1,bias=False)
+        if down:
+            self.conv11 = nn.Conv2d(cin,cout//2, kernel_size=3, stride=2,padding=1,bias=False)
+        else:
+            self.conv11 = nn.Conv2d(cin,cout//2, kernel_size=3, stride=1,padding=1,bias=False)
         self.bn11 = nn.BatchNorm2d(cout//2)
         self.conv12 = nn.Conv2d(cout//2,cout//2, kernel_size=3, stride=1,padding=1,bias=False)
         self.bn12 = nn.BatchNorm2d(cout//2)
-        self.skip1 = nn.Sequential(
-                nn.Conv2d(cin,cout, kernel_size=1, stride=2, bias=False),
-                nn.BatchNorm2d(cout))
+        if down:
+            self.skip1 = nn.Sequential(
+                    nn.Conv2d(cin,cout, kernel_size=1, stride=2, bias=False),
+                    nn.BatchNorm2d(cout))
+        else:
+            self.skip1 = nn.Identity()
         #ksize,stride, Headhdim,N,nchann,nchannout,down=False
         if use_lr:
-            self.lr1 = LRGeneratorExp(psize,hdim,N=N,nchann=cin,nchannout=cout,down=True)
-        #self.lr1 = LRGeneratorExp2(3,2,hdim,N=N,nchann=cin,nchannout=cout,down=True)
+            #self.lr1 = LRGeneratorExp(psize,hdim,N=N,nchann=cin,nchannout=cout,down=True)
+            self.lr1 = LRGeneratorExp2(3,2,hdim,N=N,nchann=cin,nchannout=cout,down=down)
         self.bno1 = nn.BatchNorm2d(cout)
         if use_lr:
             self.outlin1 = nn.Conv2d(cout,cout, kernel_size=1, stride=1,bias=False)
@@ -1119,8 +1164,9 @@ class _resnetBlockLR(nn.Module):
         self.conv22 = nn.Conv2d(cout//2,cout//2, kernel_size=3, stride=1,padding=1,bias=False)
         self.bn22 = nn.BatchNorm2d(cout//2)
         if use_lr:
-            self.lr2 = LRGeneratorExp(psize,hdim,N=N//2,nchann=cout,nchannout=cout)
-        #self.lr2 = LRGeneratorExp2(3,2,hdim,N=N//2,nchann=cout,nchannout=cout)
+            #self.lr2 = LRGeneratorExp(psize,hdim,N=N//2,nchann=cout,nchannout=cout)
+            Neff = N//2 if down else N
+            self.lr2 = LRGeneratorExp2(3,2,hdim,N=Neff,nchann=cout,nchannout=cout)
         self.bno2 = nn.BatchNorm2d(cout)
         if use_lr:
             self.outlin2 = nn.Conv2d(cout,cout, kernel_size=1, stride=1,bias=False)
@@ -1132,15 +1178,15 @@ class _resnetBlockLR(nn.Module):
         out = F.relu(self.bn11(self.conv11(x)))
         #out = self.bn12(self.conv12(out))
         out = self.conv12(out)
-        #out = F.relu(self.outlin1(self.bno1(torch.concat([out,lr],dim=1)))+skip)
-        out = F.relu(self.bno1(self.outlin1(torch.concat([out,lr],dim=1)))+skip)
+        out = F.relu(self.outlin1(self.bno1(torch.concat([out,lr],dim=1)))+skip)
+        #out = F.relu(self.bno1(self.outlin1(torch.concat([out,lr],dim=1)))+skip)
         skip = 1.0*out
         lr = self.lr2(out)
         out = F.relu(self.bn21(self.conv21(out)))
         #out = self.bn22(self.conv22(out))
         out = self.conv22(out)
-        #out = F.relu(self.outlin2(self.bno2(torch.concat([out,lr],dim=1)))+skip)
-        out = F.relu(self.bno2(self.outlin2(torch.concat([out,lr],dim=1)))+skip)
+        out = F.relu(self.outlin2(self.bno2(torch.concat([out,lr],dim=1)))+skip)
+        #out = F.relu(self.bno2(self.outlin2(torch.concat([out,lr],dim=1)))+skip)
         return out
     
     def _forwardconv(self,x):
@@ -1706,11 +1752,12 @@ class ResNetOriginalLR(nn.Module):
         self.relu = copy.deepcopy(self.frozmodel.relu)
         self.maxpool = copy.deepcopy(self.frozmodel.maxpool)
         
+        
         ## ConvBlocks
         self.conv11 = _resConvBlock(self.frozmodel.layer1,0,64,64,False)
         self.conv12 = _resConvBlock(self.frozmodel.layer1,1,64,64,False)
-        #self.conv21 = _resConvBlock(self.frozmodel.layer2,0,128,128,False)
-        #self.conv22 = _resConvBlock(self.frozmodel.layer2,1,128,128,False)
+        self.conv21 = _resConvBlock(self.frozmodel.layer2,0,128,128,False)
+        self.conv22 = _resConvBlock(self.frozmodel.layer2,1,128,128,False)
         #self.conv31 = _resConvBlock(self.frozmodel.layer3,0,256,256,False)
         #self.conv32 = _resConvBlock(self.frozmodel.layer3,1,256,256,False)
         #self.conv41 = _resConvBlock(self.frozmodel.layer4,0,512,512,False)
@@ -1718,15 +1765,17 @@ class ResNetOriginalLR(nn.Module):
         
         ## ResnetLR
         #self.reslr = _resnetBlockLR(cin=256,cout=512,N=16,psize=2,hdim=4)
-        self.reslr2 = _resnetBlockLR(cin=64,cout=128,N=64,psize=8,hdim=16,use_lr=use_lr)
+        #self.reslr1 = _resnetBlockLR(cin=64,cout=64,N=64,psize=8,hdim=16,use_lr=use_lr,down=False)
+        #self.reslr2 = _resnetBlockLR(cin=64,cout=128,N=64,psize=8,hdim=16,use_lr=use_lr)
         self.reslr3 = _resnetBlockLR(cin=128,cout=256,N=32,psize=4,hdim=16,use_lr=use_lr)
         self.reslr4 = _resnetBlockLR(cin=256,cout=512,N=16,psize=2,hdim=8,use_lr=use_lr)
         
         ## Skip layers
-        #self.skip2 = copy.deepcopy(self.frozmodel.layer2[0].downsample)
+        self.skip2 = copy.deepcopy(self.frozmodel.layer2[0].downsample)
         #self.skip3 = copy.deepcopy(self.frozmodel.layer3[0].downsample)
         #self.skip4 = copy.deepcopy(self.frozmodel.layer4[0].downsample)
         self.fc = nn.Linear(512, num_classes)
+        #self.fc = copy.deepcopy(self.frozmodel.fc)
         self.freeze_backbone()
     
     def freeze_backbone(self):
@@ -1735,15 +1784,16 @@ class ResNetOriginalLR(nn.Module):
             self.bn1,
             self.conv11,
             self.conv12,
-            #self.conv21,
-            #self.conv22,
+            self.conv21,
+            self.conv22,
             #self.conv31,
             #self.conv32,
             #self.conv41,
             #self.conv42,
-            #self.skip2,
+            self.skip2,
             #self.skip3,
             #self.skip4,
+            #self.fc
         ]
 
         for m in modules:
@@ -1767,22 +1817,23 @@ class ResNetOriginalLR(nn.Module):
         
         out = addrelu(out,self.conv11,out)
         out = addrelu(out,self.conv12,out)
+        #out = self.reslr1(out)### RESLR 1
         
-        #skip2 = self.skip2(out)
-        #out = addrelu(out,self.conv21,skip2)
-        #out = addrelu(out,self.conv22,out)
+        skip2 = self.skip2(out)
+        out = addrelu(out,self.conv21,skip2)
+        out = addrelu(out,self.conv22,out)
+        #out = self.reslr2(out) ### RESLR 2
         
         #skip3 = self.skip3(out)
         #out = addrelu(out,self.conv31,skip3)
         #out = addrelu(out,self.conv32,out)
+        out = self.reslr3(out) ### RESLR 3
         
-        out = self.reslr2(out)
-        out = self.reslr3(out)
-        out = self.reslr4(out)
+        
         #skip4 = self.skip4(out)
         #out = addrelu(out,self.conv41,skip4)
         #out = addrelu(out,self.conv42,out)
-        #out = self.reslr(out)
+        out = self.reslr4(out)### RESLR 4
         
         out = F.adaptive_avg_pool2d(out, 1).flatten(1)        
         out = self.fc(out)

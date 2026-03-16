@@ -27,8 +27,9 @@ print(sys.path,os.getcwd())
 # Paste / import your model here
 # from model import preact_resnet18_bottleneck
 # ----------------------------
-from modules.lowrank import preact_resnet18_bottleneck
+from modules.lowrank2 import preact_resnet18_bottleneck
 from utils.imagenet import ImageNetCustom
+from losses.regularization import model_orth_loss
 
 def printLog(message,fname):
     with open(fname,"a") as file:
@@ -80,7 +81,7 @@ import torch
 from torch.nn.utils import clip_grad_norm_
 
 
-LOGNAME = "train_logger_2.txt"
+LOGNAME = "train_logger_22.txt"
 newLog(LOGNAME)
 
 def train_one_epoch(
@@ -93,6 +94,7 @@ def train_one_epoch(
     total_loss, total_top1, total_top5, n = 0.0, 0.0, 0.0, 0
     tlossce = 0.0
     tlosskd = 0.0
+    tlossreg = 0.0
     
     optimizer.zero_grad(set_to_none=True)
     """
@@ -118,10 +120,12 @@ def train_one_epoch(
     """
     wce = 1.0
     wkd = 0.0 #0.6
+    wreg = 0.1 #0.25 #1.3
+    G = 5.0
     for it, (images, targets) in enumerate(loader):
         images = images.to(device, non_blocking=True)
-        images_t = F.interpolate(images, size=(224,224), mode='bilinear', align_corners=False)
-        images_t = images_t.to(torch.float32)
+        #images_t = F.interpolate(images, size=(224,224), mode='bilinear', align_corners=False)
+        #images_t = images_t.to(torch.float32)
         targets = targets.to(device, non_blocking=True)
         if scaler is not None:
             with torch.amp.autocast("cuda",dtype=torch.float16):
@@ -140,7 +144,9 @@ def train_one_epoch(
                 loss_dist += criterion_dist(vals.to(torch.float32),vals_t.to(torch.float32))
             """
             loss_dist/=4
-            loss = (wce * loss_ce + wkd * loss_dist)/accum_steps
+            #loss_reg = 1.0*torch.exp(G*model_orth_loss(model))-1.0
+            loss_reg = model_orth_loss(model)
+            loss = (wce * loss_ce + wkd * loss_dist + wreg*loss_reg)/accum_steps
             scaler.scale(loss).backward()
             if (it + 1) % log_every == 0:
                 log_gradients(model)
@@ -178,9 +184,10 @@ def train_one_epoch(
 
         bs = images.size(0)
         tlossce += loss_ce.item() * bs
+        tlossreg += loss_reg.item()*bs
         #tlosskd += loss_dist.item() * bs
         #total_loss += ((wce * loss_ce.item() + wkd * loss_dist.item()) * bs)
-        total_loss += ((wce * loss_ce.item()) * bs)
+        total_loss += ((wce * loss_ce.item()+wreg*loss_reg.item()) * bs)
         total_top1 += top1.item() * bs
         total_top5 += top5.item() * bs
         n += bs
@@ -189,7 +196,7 @@ def train_one_epoch(
             printLog(
                 f"iter {it+1:5d}/{len(loader)} | "
                 f"loss {total_loss/n:.4f} | top1 {total_top1/n:.2f}% | top5 {total_top5/n:.2f}% |"
-                f"Loss distill: {tlosskd/n:.4f}, Loss CE: {tlossce/n:.4f}",
+                f"Loss distill: {tlosskd/n:.4f}, Loss CE: {tlossce/n:.4f}, Loss Orth: {tlossreg/n:.4f}",
                 LOGNAME
             )
             #print(f"iter {it+1:5d}/{len(loader)}| Loss distill: {tlossce/n:.4f}, Loss CE: {tlosskd/n:.4f}")
@@ -406,11 +413,11 @@ def main():
 
         scheduler.step()
         ## best_test.pt
-        save_checkpoint(save_dir / "last_seq10.pt", model, optimizer, epoch, best_top1)
+        save_checkpoint(save_dir / "last_seq2011.pt", model, optimizer, epoch, best_top1)
         if va_top1 > best_top1:
             best_top1 = va_top1
-            save_checkpoint(save_dir / "best_seq10.pt", model, optimizer, epoch, best_top1)
-            printLog(f"  saved best_seq10.pt (top1={best_top1:.2f}%)",LOGNAME)
+            save_checkpoint(save_dir / "best_seq2011.pt", model, optimizer, epoch, best_top1)
+            printLog(f"  saved best_seq20.pt (top1={best_top1:.2f}%)",LOGNAME)
 
         """
         save_checkpoint(save_dir / "last_distill_partial_res22.pt", model, optimizer, epoch, best_top1)
@@ -432,7 +439,7 @@ sys.argv = [
     "--lr", "0.1",
     "--amp",
     "--label-smoothing", "0.15",
-    #"--resume","./checkpoints_stl10_256/best_seq2.pt"
+    #"--resume","./checkpoints_stl10_256/best_seq20.pt"
     #"--resume","./checkpoints_stl10_256/best_distill_partial.pt"
 ]
 

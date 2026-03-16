@@ -8,6 +8,7 @@ import torch
 import sys
 import os
 from matplotlib import pyplot as plt
+import numpy as np
 
 sys.path.insert(0,os.getcwd()) 
 if "../" not in sys.path:
@@ -66,27 +67,37 @@ for p in model.parameters():
 train_nodes, eval_nodes = get_graph_node_names(model)
 print(eval_nodes)
 #fxtractor = create_feature_extractor(model,{"reslr.bn22":"outsconv","reslr.outlin2":"outslr"})
-#fxtractor = create_feature_extractor(model,{"reslr.bn22":"outsconv","reslr.outlin2":"outslr"})
-fxtractor = create_feature_extractor(model,{"reslr.bn22":"outsconv","reslr.lr2.einsum":"outslr"})
+#fxtractor = create_feature_extractor(model,{"reslr2.conv22":"outsconv","reslr2.bno2":"outslr"})
+fxtractor = create_feature_extractor(model,{"reslr3.conv22":"outsconv","reslr3.lr2.einsum":"outslr"})
 #x = torch.randn(1, 3, 256, 256)
+#"""
 x = torchvision.io.read_image("testimg.jpg")
 x = TF.resize(x,size=288)
 x = TF.center_crop(x,256)
-print(x.max())
-x = TF.to_tensor(x.detach().numpy())
-print(x.shape)
+x = torch.permute(x,(1,2,0))
+x = x.detach().numpy()
+x = TF.to_tensor(x)
+x = TF.normalize(x,mean=(0.485, 0.456, 0.406),std=(0.229, 0.224, 0.225))
 x = x.unsqueeze(0)
-x = torch.permute(x,[0,2,3,1])
+#"""
+print(x.shape)
+#x = torch.permute(x,[0,2,3,1])
 features = fxtractor(x)
 #feats = features["outslr"].squeeze(0)
-feat_pca = pca_featuremap(features["outslr"], k=4)
+feat_pca = pca_featuremap(features["outslr"], k=8)
 feats = feat_pca.squeeze(0)
+
 feats = feats.detach().numpy()
 
 #meanf = features["outslr"].mean(dim=1).squeeze(0)
 #plotf = torch.permute(meanf,[1,2,0])
 for k in range(feats.shape[0]):
     print(f"PCA: {k}")
+    sfeats = np.sort(feats[k].flatten())
+    print(sfeats)
+    maxv = sfeats[0:-18].max()
+    minv = sfeats[18:].min()
+    #plt.imshow(feats[k],cmap='jet',vmin=minv,vmax=maxv)
     plt.imshow(feats[k],cmap='jet')
     plt.show()
 print(features['outslr'].shape)
